@@ -1311,3 +1311,6 @@ body.shell-layout .shell-main > .site-mark:has(+ .page-body),
   border-color: var(--calm-ink);
   box-shadow: var(--shadow-2), 0 0 0 1px var(--calm-ink);
 }
+
+/* 送出提示裡的連結：底色是深松青，連結色要跟著換 */
+.notice-link { color: #fff; text-decoration: underline; font-weight: 600; }

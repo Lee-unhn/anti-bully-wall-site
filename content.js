@@ -69,7 +69,6 @@
       { id: 'wall',   label: '這面牆',       kind: 'page',   target: 'index.html',  phase: 'always' },
       { id: 'cases',  label: '霸凌是什麼樣子', kind: 'page', target: 'cases.html',  phase: 'always' },
       { id: 'law',    label: '你該知道的三件事', kind: 'page', target: 'law.html',  phase: 'always' },
-      { id: 'mine',   label: '我說過的話',     kind: 'page',   target: 'mine.html',  phase: 'always' },
       /* ⛔ 預留接口，teaser 期不渲染。label 待 reveal 時改成節目名。 */
       { id: 'show',   label: '關於這個計畫',  kind: 'page',   target: 'show.html',  phase: 'reveal' }
     ],
@@ -98,7 +97,11 @@
        * 沒有任何人收得到，那是對正在說出傷口的人說謊。
        * G9 上線閘門在守這件事（LocalProvider 必須有這句或開 demoNotice）。 */
       pendingNoticeLocal: '已經收到你的話了。先說清楚：目前這句話只存在你自己的裝置上，'
-        + '還沒有其他人看得到——這個網站還在準備階段。你隨時可以在「我說過的話」找回它。',
+        + '還沒有其他人看得到——這個網站還在準備階段。',
+      /* 送出後才出現的連結。⛔ 這一頁不放進面板：平常沒有人需要它，
+       * 只有剛說完話的人需要確認自己的話還在。放在面板只是多一個沒人點的按鈕
+       * （裁定 2026-08-25）。 */
+      pendingLinkLabel: '看看我說過的話',
       emptyNotice: '牆上還沒有留言。',
 
       /* 鼓勵相關文案。這一區是這個網站的主軸——受害者說出來、其他人按鈕鼓勵他，

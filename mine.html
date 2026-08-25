@@ -8,8 +8,8 @@
 <!-- CSP 用 meta 而不是只靠 _headers：_headers 是 Cloudflare Pages 專用，
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=247ae396">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css?v=6e8c2809">
 </head>
 <body class="shell-layout">
 
@@ -25,6 +25,9 @@
       是為了讓你知道那些話還在、走到哪一步了。</p>
     <p class="hint">留言送出後會先經過人工檢視，通過才會出現在牆上。檢視期間它也會列在這裡，
       你不會找不到自己剛剛說的話。</p>
+    <p class="law-note">這個網站還在準備階段，<strong>目前沒有人在審核</strong>，
+      所以你的留言會一直停在「檢視中」，也還不會出現在牆上。
+      它沒有消失——就在下面，只存在你這台裝置裡。</p>
     <p class="hint">這裡沒有分享或下載——說出來這件事的重量不該變成一張可以轉發的圖。
       這面牆會替你留著。</p>
     <ul class="share-list" data-share-list></ul>
@@ -47,14 +50,14 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=247ae396"></script>
-<script src="js/schema.js?v=247ae396"></script>
-<script src="js/keywords.js?v=247ae396"></script>
-<script src="js/data-provider.js?v=247ae396"></script>
-<script src="js/guard.js?v=247ae396"></script>
-<script src="js/shell.js?v=247ae396"></script>
-<script src="js/wall.js?v=247ae396"></script>
-<script src="js/share.js?v=247ae396"></script>
-<script src="js/app.js?v=247ae396"></script>
+<script src="content.js?v=6e8c2809"></script>
+<script src="js/schema.js?v=6e8c2809"></script>
+<script src="js/keywords.js?v=6e8c2809"></script>
+<script src="js/data-provider.js?v=6e8c2809"></script>
+<script src="js/guard.js?v=6e8c2809"></script>
+<script src="js/shell.js?v=6e8c2809"></script>
+<script src="js/wall.js?v=6e8c2809"></script>
+<script src="js/share.js?v=6e8c2809"></script>
+<script src="js/app.js?v=6e8c2809"></script>
 </body>
 </html>

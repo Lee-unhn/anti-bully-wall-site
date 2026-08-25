@@ -608,6 +608,15 @@
               lines.push('為了保護被提到的人，內容裡的姓名與校名已經自動遮成 ' + ABW.guard.MASK_CHAR + '。');
             }
             notice.textContent = lines.join(' ');
+            /* 「我說過的話」不在面板裡——只有剛送出的人需要它，這裡給入口。 */
+            if (w.pendingLinkLabel) {
+              var a = document.createElement('a');
+              a.href = 'mine.html';
+              a.className = 'notice-link';
+              a.textContent = w.pendingLinkLabel;
+              notice.appendChild(document.createTextNode(' '));
+              notice.appendChild(a);
+            }
             notice.hidden = false;
           }
           if (scan.flags.indexOf('self_harm') !== -1) {
