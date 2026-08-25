@@ -70,7 +70,6 @@
       { id: 'cases',  label: '霸凌是什麼樣子', kind: 'page', target: 'cases.html',  phase: 'always' },
       { id: 'law',    label: '你該知道的三件事', kind: 'page', target: 'law.html',  phase: 'always' },
       { id: 'mine',   label: '我說過的話',     kind: 'page',   target: 'mine.html',  phase: 'always' },
-      { id: 'privacy',label: '你的資料怎麼被處理', kind: 'page', target: 'privacy.html', phase: 'always' },
       /* ⛔ 預留接口，teaser 期不渲染。label 待 reveal 時改成節目名。 */
       { id: 'show',   label: '關於這個計畫',  kind: 'page',   target: 'show.html',  phase: 'reveal' }
     ],
@@ -262,7 +261,8 @@
      * ⛔ 已移除。原本是「留 email，有進展時通知你」。
      * 裁定 2026-08-25（Lee）：不收 email。這個站因此完全不蒐集任何個人資料，
      * 個資法第 8 條的告知義務也就不適用——比寫一份完整的告知更乾淨。
-     * 要加回任何收集欄位之前，先看 privacy.html 與 G24 閘門。 */
+     * 要加回任何蒐集欄位之前，先看 G24 閘門——它紅了就代表「零蒐集」這個
+     * 前提不成立了，屆時個資法第 8 條的告知義務要一起處理。 */
 
 
     /* ---- 求助資源（安全層用，非行銷文案，不可刪） ---- */
