@@ -17,6 +17,7 @@
  *   createMessage(draft)            -> Message        // 一律以 pending 建立
  *   setStatus(id, status)           -> Message        // 後台限定
  *   react(id, reactionId)           -> Message
+ *   getViewMode() / setViewMode(mode) -> 'danmaku' | 'board' | null  // 本機偏好
  *   getKeywords()                   -> KeywordSet
  *   setKeywords(set)                -> KeywordSet     // 後台限定
  */
@@ -215,6 +216,20 @@
         return Promise.resolve(msg);
       },
 
+      /* 檢視模式偏好。⛔ 全站只有本檔可以碰 localStorage（G5），
+       * 所以 wall.js 不自己存，走這裡。 */
+      getViewMode: function () {
+        var db = read();
+        return Promise.resolve(db.viewMode || null);
+      },
+
+      setViewMode: function (mode) {
+        var db = read();
+        db.viewMode = mode;
+        write(db);
+        return Promise.resolve(mode);
+      },
+
       getKeywords: function () {
         var db = read();
         return Promise.resolve(db.keywords || ABW.defaultKeywords());
@@ -266,6 +281,9 @@
         }
         return req('POST', '/messages/' + id + '/reactions', { reaction: reactionId });
       },
+      /* 檢視模式是使用者的本機偏好，即使接了後端也不上傳 */
+      getViewMode: function () { return LocalProvider.getViewMode(); },
+      setViewMode: function (mode) { return LocalProvider.setViewMode(mode); },
       getKeywords: function () { return req('GET', '/keywords'); },
       setKeywords: function (set) { return req('PUT', '/keywords', set); }
     };

@@ -38,7 +38,8 @@
     mode: 'danmaku',
     items: [],            /* { msg, el, x, y, vx, lane, paused, countEls } */
     lanes: 1,
-    myAlias: null,          /* 本機代號，用來標出「這是你說的」 */
+    myAlias: null,
+    savedMode: null,       /* 使用者上次明確選過的檢視模式 */          /* 本機代號，用來標出「這是你說的」 */
     stage: null,
     plane: null,
     raf: null,
@@ -703,6 +704,9 @@
     document.querySelectorAll('[data-wall-mode]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var mode = btn.getAttribute('data-wall-mode');
+        /* 記住使用者明確按過的選擇。下次進站直接照這個走，
+         * 不必每次重按——尤其是系統開了「減少動態」的人。 */
+        if (ABW.provider.setViewMode) ABW.provider.setViewMode(mode);
         if (mode === 'danmaku' && state.reduced) {
           state.reduced = false;
           document.documentElement.classList.add('force-motion');
@@ -724,6 +728,10 @@
 
     return ABW.provider.getAlias()
       .then(function (alias) { state.myAlias = alias && alias.name; })
+      .then(function () {
+        return ABW.provider.getViewMode ? ABW.provider.getViewMode() : null;
+      })
+      .then(function (mode) { state.savedMode = mode; })
       .then(function () { return ABW.provider.ensureSeeds(ABW.content.seeds); })
       .then(function () { return ABW.provider.listApproved(); })
       .then(function (list) {
@@ -740,7 +748,19 @@
             : base;
         }
         /* reduced-motion 使用者直接進靜態的畫布模式，不做漂浮 */
-        setMode(state.reduced ? 'board' : 'danmaku');
+        /* 預設值的順位：
+         *   1. 使用者上次明確按過的模式（他自己的意思最大）
+         *   2. 系統的 reduced-motion 設定（沒表達過意見時尊重它）
+         * ⛔ 不要拿掉第 2 條——對開了減少動態的人自動播放動畫，
+         *    對前庭系統敏感的使用者是實際傷害，不是偏好問題。 */
+        var pref = state.savedMode;
+        if (pref === 'danmaku' && state.reduced) {
+          state.reduced = false;
+          document.documentElement.classList.add('force-motion');
+          state.mode = 'danmaku';
+          seedPositions();
+        }
+        setMode(pref || (state.reduced ? 'board' : 'danmaku'));
         return maybeMountFpsBadge().then(function () { return list.length; });
       })
       .catch(function (err) {
