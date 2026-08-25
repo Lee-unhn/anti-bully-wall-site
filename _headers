@@ -1,3 +1,8 @@
+# ⚠️ 這個檔只有 Cloudflare Pages 會讀。GitHub Pages 完全不讀它
+#    （2026-08-25 實測：線上請求 /_headers 回 404，CSP 一點都沒生效）。
+#    真正生效的 CSP 是每一頁的 <meta http-equiv>，G26 閘門在守。
+#    這個檔保留是為了日後改用 Cloudflare 時直接可用。
+
 # Cloudflare Pages headers
 # 這個站不載入任何外部資源，所以 CSP 可以收到最緊。
 # 改動前先跑 node scripts/smoke.js（G3 外連白名單）確認沒有新的外連需求。

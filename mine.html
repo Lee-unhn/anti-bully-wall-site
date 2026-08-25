@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>我說過的話</title>
 <meta name="description" content="只能分享你自己的留言。">
+<!-- CSP 用 meta 而不是只靠 _headers：_headers 是 Cloudflare Pages 專用，
+     GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
+     meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="shell-layout">
