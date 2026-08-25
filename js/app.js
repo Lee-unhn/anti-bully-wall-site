@@ -11,6 +11,10 @@
 
   function text(el, value) { if (el) el.textContent = value; }
 
+  /* ⛔ 這裡每一行都在讀 ABW.content 的欄位。移除 content 欄位時一定要
+   * 回來一起改——2026-08-25 移除 cta 時漏了這裡，c.cta.primary 拋
+   * TypeError，整個 boot 中斷，牆與分流都沒渲染，而網站已經上線。
+   * G25 閘門現在會核對每一個參照是否真的存在。 */
   function renderStaticCopy() {
     var c = ABW.content;
     /* 分頁標題與 meta 也跟著 content 走，換素材時不用改 html。
@@ -26,11 +30,6 @@
     var box = document.getElementById('compose-body');
     if (box && c.wall.composePlaceholder) box.setAttribute('placeholder', c.wall.composePlaceholder);
     text($('[data-c="wall.reactionsHint"]'), c.wall.reactionsHint);
-    text($('[data-c="drama.name"]'), c.drama.name);
-    text($('[data-c="drama.troupe"]'), c.drama.troupe);
-    text($('[data-c="drama.synopsis"]'), c.drama.synopsis);
-    text($('[data-c="cta.primary"]'), c.cta.primary.label);
-    text($('[data-c="cta.primaryNote"]'), c.cta.primary.note);
   }
 
   /* 首屏分流。inline 的兩條不換頁——受害者按了就直接把游標放進輸入框，
@@ -127,24 +126,6 @@
     });
   }
 
-  function renderShows() {
-    var host = $('[data-c="drama.shows"]');
-    if (!host) return;
-    host.innerHTML = '';
-    ABW.content.drama.shows.forEach(function (s) {
-      var li = document.createElement('li');
-      li.textContent = s.date + '　' + s.venue + (s.note ? '（' + s.note + '）' : '');
-      host.appendChild(li);
-    });
-    var fb = $('[data-c="cta.secondary"]');
-    if (fb) {
-      var url = ABW.content.cta.secondary.url;
-      fb.textContent = ABW.content.cta.secondary.label;
-      /* 網址還沒給就不要生一個點了會壞的連結 */
-      if (/^https?:/.test(url)) fb.href = url;
-      else { fb.removeAttribute('href'); fb.setAttribute('aria-disabled', 'true'); }
-    }
-  }
 
 
 
@@ -162,7 +143,6 @@
     renderReactionLegend();
     renderLawCards();
     renderHelp();
-    renderShows();
     renderDemoNotice();
 
     return ABW.provider.init()
