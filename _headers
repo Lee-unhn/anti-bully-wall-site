@@ -1,0 +1,23 @@
+# Cloudflare Pages headers
+# 這個站不載入任何外部資源，所以 CSP 可以收到最緊。
+# 改動前先跑 node scripts/smoke.js（G3 外連白名單）確認沒有新的外連需求。
+
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), interest-cohort=()
+  X-Frame-Options: DENY
+
+/admin-*
+  X-Robots-Tag: noindex, nofollow
+
+# 客戶改一行文案就重新部署，回訪者不該拿到舊的 js/css。
+# no-cache 不是不快取，是「用之前一定回來問伺服器」，沒改就回 304。
+# 開發時我被這件事坑過三次：改完 wall.js 重載，瀏覽器仍跑舊版，
+# 量到的行為全是錯的。正式環境同一個坑，代價是客戶以為自己沒改到。
+/*.js
+  Cache-Control: no-cache
+
+/*.css
+  Cache-Control: no-cache

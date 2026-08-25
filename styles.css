@@ -1,0 +1,1313 @@
+/* styles.css — 全站單檔樣式，token 化。
+ *
+ * 視覺主張（2026-08-21 修正）：「這面牆」是一面**日光下的暖牆**，不是暗牆。
+ *   2026-08-20 那版把舞台做成暗牆，Lee 實機看過後的判斷是「太灰暗」——
+ *   一個要人願意開口的地方不該讓人覺得走進地下室。舞台改成暖奶油，
+ *   留言是貼在牆上的紙，靠陰影與左緣豎線浮起來，不靠明暗對打。
+ *   每張紙左緣有一道豎線：金＝還沒有人回應，松青＝已經有人回應了。
+ *
+ * 色票基底：Rosé Pine Dawn（MIT, github.com/rose-pine/palette）的 base/surface/
+ *   overlay/text 直接沿用；強調色沿用它的色相但加深到 WCAG AA
+ *   （原始的 gold/love/foam/iris 當文字全部不到 4.5:1，見 :root 註解）。
+ *
+ * ⛔ 改配色前先跑 node scripts/a11y-probe.js。所有承載文字的組合都算過（見 :root 註解）。
+ * ⛔ 零外部資源：無 CDN、無 webfont、無外部圖。字型只用系統字型堆疊（CSP default-src self）。
+ */
+
+/* ============================================================
+ * 1. 設計代幣
+ * ========================================================== */
+:root {
+  color-scheme: light;
+  /* --- 墨與紙：Rosé Pine Dawn。暖奶油，不是灰、更不是暗。 --- */
+  --ink:         #575279;   /* Dawn text。紙上 6.66:1／卡上 7.00:1 */
+  --ink-soft:    #6b6685;   /* Dawn subtle 加深（原 #797593 只有 4.02）。紙上 4.98:1 */
+  --paper:       #faf4ed;   /* Dawn base */
+  --card:        #fffaf3;   /* Dawn surface */
+  --msg-paper:   #fffaf3;
+  --line:        rgba(87, 82, 121, 0.16);
+  --line-strong: rgba(87, 82, 121, 0.30);
+
+  /* --- 金：主色。沿用 Dawn gold 的色相，加深到承白字 5.32:1。
+   *     ⛔ 不可直接用 Dawn 原色 #ea9d34——承白字只有 2.24:1、當文字只有 2.05:1。
+   *     它現在叫 --warm-tint，只做裝飾。 --- */
+  --warm:        #9c5c08;   /* 承白字 5.32:1／當文字紙上 4.87:1，兩用皆合格 */
+  --warm-text:   #9c5c08;
+  --warm-tint:   #ea9d34;   /* Dawn gold。只做邊框與裝飾，永不承載文字 */
+  --warm-soft:   #f7dcae;
+  --warm-wash:   #fbf0df;
+
+  /* --- 松青：溫暖／已經被回應。取代原本的綠，理由是綠在這組暖色裡會顯髒。 --- */
+  --calm:        #56949f;   /* Dawn foam。只做淺底與邊框，永不承載文字 */
+  --calm-ink:    #286983;   /* Dawn pine。紙上 5.59:1／卡上 5.88:1／承白字 6.11:1 */
+  --calm-text:   #286983;
+  --calm-wash:   #e4eef0;
+
+  /* --- 資訊、法律、焦點 --- */
+  --focus:       #286983;   /* 承白字 6.11:1 */
+  --link:        #286983;   /* 紙上 5.59:1 */
+  --ring:        #286983;
+
+  /* --- 牆面：日光下的暖牆。⛔ 不要再做成暗牆（2026-08-20 試過，Lee 否決）。 --- */
+  --stage:       #f2e9e1;   /* Dawn overlay */
+  --stage-0:     rgba(242, 233, 225, 0);
+  --stage-seam:  rgba(87, 82, 121, 0.055);
+  --stage-glow:  rgba(234, 157, 52, 0.20);
+  --stage-edge:  #e4d9cf;
+
+  /* --- 留言卡左緣豎線：狀態即顏色（對卡片底皆 > 3:1，WCAG 1.4.11） --- */
+  --rule-waiting:  #9c5c08;   /* 卡上 5.12:1 */
+  --rule-answered: #286983;   /* 卡上 5.88:1 */
+
+  /* --- 草稿標記 --- */
+  --draft-bg:    #f7dcae;
+  --draft-ink:   #4a3a1c;
+
+  /* --- 形狀、節奏、陰影 --- */
+  --radius:      12px;
+  --radius-sm:   7px;
+  --radius-pill: 999px;
+  --gap:         clamp(16px, 3vw, 32px);
+  --measure:     68ch;
+  --shadow-1:    0 1px 2px rgba(87, 82, 121, 0.08);
+  --shadow-2:    0 1px 2px rgba(87, 82, 121, 0.10), 0 8px 18px -12px rgba(87, 82, 121, 0.34);
+  --shadow-3:    0 2px 5px rgba(87, 82, 121, 0.14), 0 18px 34px -16px rgba(87, 82, 121, 0.44);
+  --shadow-up:   0 -12px 24px -20px rgba(87, 82, 121, 0.40);
+}
+
+/* 深色模式：把「暖」保住，只換明度關係。
+ * 2026-08-19 設計系統盤點出的兩個缺口（--focus 連結 2.49:1、--calm-ink 溫暖字樣 3.07:1）
+ * 在這裡修掉——作法是把「當底色的實色」與「當字色的顏色」拆成兩個代幣：
+ *   --focus / --calm-ink   永遠是實色底（承白字），兩個主題同值；
+ *   --link / --calm-text   是字色，深色模式改亮。 */
+/* ⛔ 這個站不跟隨系統深色模式，一律走亮色。
+ *
+ * 裁定 2026-08-21（Lee）：暗色版本連續三次被判「太灰暗」——
+ * 近黑 #0d0b09、紫黑 #191724、暖棕 #1c1512 都一樣。
+ * 結論不是「再調一次深色」，是這類網站根本不該有深色版：
+ * 一個要人願意開口的地方，不該讓人覺得是在半夜獨自打開它。
+ *
+ * 原本的深色代幣區塊（約 30 行）已移除，需要時從 git 取回：
+ *   git show 94bb1a9:website/styles.css
+ *
+ * :root 的 color-scheme: light 是必要的——沒有它，系統深色模式下
+ * 表單元件（textarea、input、捲軸）仍會被瀏覽器畫成深色，與頁面打架。
+ */
+
+
+/* ============================================================
+ * 2. 基礎與字階
+ * ========================================================== */
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 0 var(--gap) 64px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.75;
+  /* 中文在螢幕上稍微鬆開字距比較好讀，也讓整體慢下來——這個網站不該讀起來很急 */
+  letter-spacing: 0.015em;
+}
+
+main, header, footer { max-width: var(--measure); margin-inline: auto; }
+
+/* 層次靠字重、字距、留白拉開，不靠再多加一種顏色 */
+h1, h2, h3 { line-height: 1.3; letter-spacing: 0.005em; font-weight: 700; }
+h1 { font-size: clamp(1.6rem, 5vw, 2.4rem); margin: 0 0 0.4em; }
+h2 { font-size: clamp(1.2rem, 3.2vw, 1.5rem); margin-top: 2.2em; }
+h3 { font-size: 1.06rem; margin: 0 0 0.4em; letter-spacing: 0.02em; }
+
+.tagline { font-size: 1.08em; color: var(--ink-soft); max-width: 34ch; }
+.alias-line { color: var(--ink-soft); font-size: 0.95em; }
+.hint { color: var(--ink-soft); font-size: 0.92em; }
+
+a { color: var(--link); text-underline-offset: 3px; }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+ * 3. 按鈕
+ * ========================================================== */
+button {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--warm);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background-color 0.14s ease, box-shadow 0.14s ease;
+}
+button:hover { background: var(--warm-text); }
+/* 次要鈕仍靠 DOM 順序決定（沿用既有結構，沒有新增 class）。
+ * ⚠️ 這條的 margin-left 會誤傷所有「相鄰按鈕」，包括彈幕卡上的五顆鼓勵鈕
+ * （每顆多吃 8px，五顆就是 32px，正好是計數變兩位數時被裁掉的那一截）
+ * 與工具列，所以下面兩處把它歸零。 */
+button + button { margin-left: 8px; background: var(--ink-soft); }
+button + button:hover { background: var(--ink); }
+.msg-reactions button + button,
+.wall-toolbar button + button { margin-left: 0; }
+/* 停用態原本完全沒有樣式，看起來跟可按的鈕一模一樣 */
+button:disabled,
+button:disabled:hover {
+  background: var(--line-strong);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ============================================================
+ * 4. 橫幅與通知
+ * ========================================================== */
+.demo-notice {
+  margin: 0 calc(var(--gap) * -1);
+  padding: 11px var(--gap);
+  background: var(--warm-soft);
+  color: #3a2b1d;                 /* 8.74:1 */
+  font-size: 0.92em;
+  border-bottom: 1px solid rgba(58, 43, 29, 0.18);
+}
+
+
+
+/* 通知列承載白字，用深綠（--calm 只做淺色底與邊框） */
+.notice {
+  background: var(--calm-ink);
+  color: #fff;                    /* 5.42:1 */
+  border-radius: var(--radius-sm);
+  padding: 11px 15px;
+  font-size: 0.92em;
+  box-shadow: var(--shadow-1);
+}
+
+/* 草稿標記：改成實色塊＋深字。原本是亮黃斜紋配 --ink，
+ * 深色模式下字翻白、斜紋還是亮黃，整段讀不到（2026-08-19 設計系統盤點第 4 項）。 */
+.draft-badge {
+  display: block;
+  background: var(--draft-bg);
+  color: var(--draft-ink);
+  border: 0;
+  border-left: 4px solid var(--warm);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 14px;
+  font-size: 0.9em;
+}
+
+/* ============================================================
+ * 5. 外框（shell）：桌機＝左主區＋右常駐面板；手機＝主區滿版＋底部 tab bar
+ * 面板常駐是裁定（2026-08-19 Q8）——收起來就變成選單，不叫面板了。
+ * ========================================================== */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* 明確排出三列，兩條橫幅各佔一列。
+ * 原本只宣告 "main panel" 一列：橫幅用 grid-column: 1/-1 佔掉自動產生的第二列，
+ * 面板的外層 <div data-shell> 於是被自動排到第三列第一欄——
+ * 桌機版的「常駐右側面板」其實掉到牆的下面，右邊那 280px 是空的。
+ * 這是實測 getBoundingClientRect 抓到的（面板 top=807.9、left=0、width=984.8）。 */
+body.shell-layout {
+  padding: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr var(--panel-w, 292px);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-areas:
+    "simnotice  simnotice"
+    "demonotice demonotice"
+    "main       panel";
+}
+body.shell-layout .sim-notice  { grid-area: simnotice;  margin: 0; }
+body.shell-layout .demo-notice { grid-area: demonotice; margin: 0; }
+body.shell-layout > [data-shell] { grid-area: panel; min-width: 0; }
+
+.shell-main {
+  grid-area: main;
+  min-width: 0;              /* 沒有這行，彈幕舞台會把格線撐爆 */
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--gap);
+}
+
+/* 主區內的區塊不再套 --measure 置中：彈幕要滿版才有衝擊力 */
+body.shell-layout .shell-main > * { max-width: none; margin-inline: 0; }
+
+/* <main> 原本是 block，彈性鏈在這裡斷掉——.wall-region 的 flex:1 對一個 block 父層無效，
+ * 所以舞台高度以前只能靠 min-height: 52vh 硬撐。把 <main> 接回彈性鏈，
+ * 舞台才會真的吃掉剩下的高度（也才不用寫死 vh）。 */
+body.shell-layout .shell-main > main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ---- 右側面板 ---- */
+.shell-panel {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: clamp(16px, 2.4vw, 26px) 14px 20px;
+  background: var(--card);
+  border-left: 1px solid var(--line);
+}
+.shell-panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+/* 導覽項改成「左緣指示條」而不是整塊填色的方鈕：
+ * 一排同樣圓角同樣 1px 灰邊的方鈕就是最典型的預設 UI 長相。 */
+.shell-nav-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 13px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.97em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.shell-nav-item:hover { background: var(--warm-wash); border-left-color: var(--warm-tint); }
+.shell-nav-item[aria-current="page"] {
+  background: var(--warm-wash);
+  border-left-color: var(--warm);
+  color: var(--warm-text);        /* 5.41:1 */
+  font-weight: 700;
+}
+
+/* 求助鈕釘在面板底部並與導覽拉開距離——它不是「其中一個去處」。
+ * 整個面板只有它是實色，視覺份量刻意最重。 */
+.shell-help {
+  position: relative;
+  margin-top: auto;
+  background: var(--warm);
+  color: #fff;                    /* 5.02:1 */
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  line-height: 1.45;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+}
+.shell-help::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -16px;
+  border-top: 1px solid var(--line);
+}
+.shell-help:hover { background: var(--warm-text); }
+
+/* ============================================================
+ * 6. 首屏：站名、規模、身分分流
+ * ========================================================== */
+.site-mark {
+  padding: 10px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+/* 站名前面那道橘色豎線＝整個網站的識別記號，跟留言卡左緣是同一個語彙 */
+.site-mark h1 {
+  font-size: clamp(1.2rem, 2.1vw, 1.6rem);
+  margin: 0;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-mark h1::before {
+  content: "";
+  width: 5px;
+  height: 1.05em;
+  background: var(--warm);
+  border-radius: 2px;
+}
+.site-mark .tagline {
+  margin: 0;
+  font-size: 1em;
+  max-width: none;
+  color: var(--warm-text);        /* 紙上 5.47:1。標語是橘的——這是這個站對你的承諾 */
+  font-weight: 600;
+}
+.site-mark .wall-scale { margin: 0; flex-basis: 100%; }
+.site-mark .triage { flex-basis: 100%; margin: 6px 0 0; }
+.site-mark .alias-line { flex-basis: 100%; margin: 3px 0 0; font-size: 0.82em; line-height: 1.4; }
+
+/* 首屏數字：規模本身就是論述 */
+.wall-scale {
+  margin: 0 0 8px;
+  font-size: 0.92em;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+/* 數字放大但把行高鎖成 1——不鎖的話這一行光行框就吃掉 46px，
+ * 那是從彈幕舞台身上偷走的高度（桌機一條軌道 108px）。 */
+.wall-scale strong {
+  font-variant-numeric: tabular-nums;
+  font-size: 1.6em;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--warm-text);
+  letter-spacing: -0.01em;
+  margin-right: 1px;
+}
+
+/* ---- 首屏分流（版型 C）----
+ * 四個國際反霸凌網站的共同做法：一進站先問「你是誰、你要幹嘛」。
+ * 三張卡的視覺份量刻意不相等：「我被霸凌」是這個站存在的理由，
+ * 所以它是唯一的實色卡；另外兩條走「卡片＋左緣色條」的次級樣式。
+ * 顏色沿用全站語彙：橘＝正在受苦的人、綠＝給溫暖的人、藍＝資訊與法律。 */
+.triage {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  /* min() 讓窄螢幕也能排成兩欄——三條路各佔一整列會把首屏推掉 60px，
+   * 那 60px 是彈幕舞台的半條軌道以上。 */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+}
+.triage-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--card);
+  padding: 8px 13px;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
+}
+.triage-item .t-label { display: block; font-size: 1em; font-weight: 700; letter-spacing: 0.04em; line-height: 1.35; }
+.triage-item .t-note  { display: block; font-size: 0.82em; margin-top: 1px; line-height: 1.4; }
+
+.triage-victim {
+  background: var(--warm);
+  border-color: var(--warm);
+  border-left-color: var(--warm-text);
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.3);
+}
+.triage-victim .t-label { color: #fff; }      /* 5.02:1 */
+.triage-victim .t-note  { color: #fff6ec; }   /* 4.70:1 */
+.triage-victim:hover { background: var(--warm-text); border-color: var(--warm-text); }
+
+.triage-bystander { border-left-color: var(--calm-ink); }
+.triage-bystander .t-label { color: var(--ink); }
+.triage-bystander .t-note  { color: var(--ink-soft); }
+.triage-bystander:hover { background: var(--calm-wash); }
+
+.triage-learn { border-left-color: var(--focus); }
+.triage-learn .t-label { color: var(--ink); }
+.triage-learn .t-note  { color: var(--ink-soft); }
+.triage-learn:hover { background: var(--card); }
+
+.triage-item:hover { box-shadow: var(--shadow-2); }
+
+/* ============================================================
+ * 7. 留言牆
+ * ========================================================== */
+.wall-region { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+
+/* ---- 檢視切換：做成安靜的分段控制，選取態用墨色不用藍色方塊 ---- */
+.wall-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.wall-toolbar button {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  font-size: 0.86em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.wall-toolbar button:hover { background: var(--warm-wash); color: var(--ink); border-color: var(--line-strong); }
+.wall-toolbar button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);            /* 14.16:1 */
+  border-color: var(--ink);
+}
+.wall-toolbar button[aria-pressed="true"]:hover { background: var(--ink); color: var(--paper); }
+.wall-toolbar .wall-status { margin-left: auto; }
+.wall-status { color: var(--ink-soft); font-size: 0.86em; }
+
+/* ---- 舞台＝一面牆 ----
+ * 磚縫是兩層 repeating-linear-gradient（約 5% 不透明度），不是圖檔——
+ * CSP 是 default-src self，而且外部圖片一律禁止。
+ * 底部那圈暖光讓暗牆不會讀成「空的黑盒子」。 */
+.wall-stage {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  min-height: 320px;
+  height: 60vh;
+  border: 1px solid var(--stage-edge);
+  border-radius: var(--radius);
+  background-color: var(--stage);
+  background-image:
+    radial-gradient(150% 96% at 50% 116%, var(--stage-glow), transparent 62%),
+    repeating-linear-gradient(90deg, var(--stage-seam) 0 1px, transparent 1px 132px),
+    repeating-linear-gradient(180deg, var(--stage-seam) 0 1px, transparent 1px 48px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 233, 0.06),
+    inset 0 26px 44px -34px #000,
+    inset 0 -44px 66px -54px #000;
+  touch-action: none;
+}
+.wall-stage[data-mode="board"] { cursor: grab; }
+.wall-stage.grabbing { cursor: grabbing; }
+
+/* 左右兩道漸層，讓留言是「從牆裡浮出來、又沉回去」，不是撞到硬邊界就消失。
+ * 用 ::before/::after 疊一層靜態塗色，而不是對舞台上 mask——
+ * mask 會把整棵移動中的子樹拉進同一個合成層，200 則的幀率就沒了。 */
+.wall-frame::before,
+.wall-frame::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* ⛔ 這個寬度要跟卡片寬度成比例，不是隨便給個小數字。
+   * 原本 clamp(16px, 3.5%, 44px) 最多 44px，但卡片有 580px 寬——
+   * 一張卡在邊界有 500px 是硬切的，切在鼓勵鈕中間，看起來像渲染壞掉
+   * 而不是「彈幕流出畫面」（2026-08-24 第一次真的看到畫面才發現）。 */
+  width: clamp(72px, 16%, 200px);
+  pointer-events: none;
+  z-index: 3;
+}
+.wall-frame::before { left: 0;  background: linear-gradient(90deg, var(--stage), var(--stage-0)); }
+.wall-frame::after  { right: 0; background: linear-gradient(270deg, var(--stage), var(--stage-0)); }
+
+/* 首頁的舞台吃掉主區剩下的所有高度：牆是主體，其他東西讓位。
+ * min-height 用 px 不用 vh——1280x720 下要保住 3 條軌道（軌道高 = 卡片高 98 + 10 = 108px，
+ * 實測舞台 374px 剛好三條）。 */
+.wall-region .wall-stage { flex: 1 1 auto; height: auto; min-height: 320px; }
+
+.wall-plane {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ---- 留言卡＝牆上被照亮的一張紙 ----
+ * ⛔ 不要加 transition: transform / margin / filter 之類會觸發 layout 或
+ *    per-frame 合成成本的東西。彈幕靠 translate3d 移動，200 則要維持 FPS >= 30。
+ * 左緣豎線是狀態：橘＝還在等一句話，綠＝已經有人回應了。整面牆掃一眼就知道哪些被接住了。 */
+.msg-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* 580px 是為了讓五顆帶字的鼓勵鈕排成「一行」。300px 時它們折成三排，
+   * 卡片高度暴增，軌道數直接砍到 1 軌。 */
+  width: min(580px, 88vw);
+  padding: 9px 14px 8px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--rule-waiting);
+  border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
+  background: var(--msg-paper);
+  box-shadow: var(--shadow-2);
+  will-change: transform;
+  transition: box-shadow 0.15s ease, border-color 0.2s ease;
+}
+/* :has() 不支援的瀏覽器只是維持橘色豎線，不會壞掉 */
+.msg-card:has(.msg-warmth.has-warmth) { border-left-color: var(--rule-answered); }
+
+.msg-card.paused,
+.msg-card:focus-within {
+  box-shadow: var(--shadow-3);
+  z-index: 2;
+}
+
+.msg-body {
+  margin: 0;
+  font-size: 0.95em;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+/* 出處併進溫暖那一行，省一整行高度（一行 ≈ 23px，乘以軌道數很有感） */
+.msg-attribution { display: none; }
+
+/* 收到的溫暖：0 的時候是邀請，不是分數（裁定 2026-08-18） */
+.msg-warmth {
+  margin: 4px 0 0;
+  font-size: 0.73em;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+}
+.msg-warmth.has-warmth { color: var(--calm-text); font-weight: 700; }
+
+/* 出處標記：跟在溫暖那一行尾端。⛔ 不可移除——牆上必須看得出哪些不是真人投稿。 */
+.msg-source { margin-left: 6px; opacity: 0.8; font-weight: 400; font-style: normal; }
+
+/* ⛔ 鼓勵字樣必須常駐可見。這是網站主軸——受害者說出來、其他人按鈕鼓勵他。
+   藏在 hover 後面會讓整面牆只剩傷心話、看不到任何溫暖（G18 在守這件事）。 */
+.msg-reactions {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.msg-reaction {
+  flex: 0 0 auto;
+  background: var(--warm-wash);
+  color: var(--ink);              /* 14.00:1 */
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--line);
+  border-radius: var(--radius-pill);
+  padding: 5px 10px;
+  font-size: 0.78em;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+.msg-reaction .glyph { color: var(--warm-text); font-size: 1.05em; line-height: 1; }
+.msg-reaction .label { white-space: nowrap; }
+.msg-reaction:hover {
+  background: var(--calm-wash);
+  box-shadow: inset 0 0 0 1px var(--calm);
+}
+.msg-reaction:hover .glyph { color: var(--calm-text); }
+.msg-reaction.given {
+  background: var(--calm-ink);
+  color: #fff;                    /* 5.42:1 */
+  box-shadow: inset 0 0 0 1px var(--calm-ink);
+}
+.msg-reaction.given .glyph,
+.msg-reaction.given:hover .glyph { color: #fff; }
+.msg-reaction.given:hover { background: var(--calm-ink); box-shadow: inset 0 0 0 1px var(--calm-ink); }
+.msg-reaction .count {
+  font-variant-numeric: tabular-nums;
+  color: inherit;
+  opacity: 0.85;
+  font-size: 0.92em;
+}
+
+.wall-tally {
+  margin: 7px 0 0;
+  font-size: 0.88em;
+  line-height: 1.35;
+  color: var(--calm-text);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+/* ⛔ 不要再把這行藏起來。2026-08-20 我為了壓縮高度把它 display:none，
+   結果全站唯一「怎麼給鼓勵、怎麼讓卡片停住」的說明就消失了，沒有任何
+   media query 會把它開回來。要省高度就縮字級，不要整行拿掉。 */
+.wall-howto { margin: 2px 0 0; font-size: 0.82em; }
+
+/* 舊的靜態版留言列表樣式（非彈幕頁面沿用） */
+.reactions { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.reaction-chip {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  background: var(--card);
+  font-size: 0.95em;
+}
+
+/* 一般表單（非彈幕頁） */
+.compose textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+.compose label { display: block; font-size: 0.9em; color: var(--ink-soft); margin-bottom: 4px; }
+.compose-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+
+/* ============================================================
+ * 8. 底部常駐輸入列
+ * 核心動作是「說出來」，藏進對話框會掉轉換（裁定 2026-08-19）。
+ * ========================================================== */
+.composer-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  padding: 7px 0 9px;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  box-shadow: var(--shadow-up);
+}
+/* 輸入列不再單獨佔一行 label，改用 placeholder；label 留給輔助技術 */
+.composer-bar .compose > label {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.composer-row { display: flex; gap: 8px; align-items: flex-end; }
+.composer-row textarea {
+  flex: 1 1 auto;
+  min-height: 38px;
+  max-height: 30vh;
+  padding: 7px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.45;
+  resize: vertical;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+.composer-row textarea:hover { border-color: var(--warm-tint); }
+.composer-row textarea:focus {
+  border-color: var(--warm);
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.16);
+}
+.composer-row button { flex: 0 0 auto; align-self: stretch; padding: 8px 24px; line-height: 1.4; }
+.composer-bar .hint { display: inline-block; margin-top: 2px; font-size: 0.8em; line-height: 1.4; }
+
+
+/* ============================================================
+ * 9. 求助資源
+ * 「求助」在這個站永遠是最高對比、最實的那一塊。
+ * ========================================================== */
+#help { border-left: 4px solid var(--warm); padding-left: 16px; }
+.help-lines { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+
+.help-dialog {
+  max-width: 34rem;
+  border: 0;
+  border-left: 6px solid var(--warm);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--card);
+  color: var(--ink);
+  padding: 24px 26px;
+  box-shadow: var(--shadow-3);
+}
+.help-dialog::backdrop { background: rgba(16, 13, 11, 0.62); }
+.help-dialog h2 { margin-top: 0; letter-spacing: 0.04em; }
+.help-dialog .help-lines { flex-direction: column; gap: 8px; font-size: 1.08em; margin: 14px 0; }
+.help-dialog a { font-weight: 700; }
+
+/* ============================================================
+ * 10. 行銷層：法律三卡、訂閱、分享
+ * ========================================================== */
+.law-cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.law-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--focus);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 16px 18px 18px;
+  box-shadow: var(--shadow-1);
+}
+.law-card h3 { margin-top: 0; color: var(--ink); }
+
+.subscribe { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.subscribe label { width: 100%; font-size: 0.9em; color: var(--ink-soft); }
+.subscribe input {
+  flex: 1 1 220px;
+  padding: 10px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+
+.shows { padding-left: 1.2em; }
+.share-list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.share-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--rule-answered);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 13px 15px;
+  background: var(--card);
+  box-shadow: var(--shadow-1);
+}
+.share-item p { margin: 0; }
+.share-item button { flex: 0 0 auto; }
+.secondary-cta { display: inline-block; margin-top: 8px; }
+.secondary-cta[aria-disabled="true"] { color: var(--ink-soft); text-decoration: line-through; }
+
+/* 分頁本體：內文回到可讀寬度（只有彈幕牆需要滿版）。
+ * 需要這條較高優先序的選擇器——上面的 `.shell-main > *` 把 max-width 全部解開了，
+ * 結果法律頁的內文一行拉到 908px，長到讀不下去。 */
+.page-body { max-width: var(--measure); }
+body.shell-layout .shell-main .page-body { max-width: var(--measure); }
+.page-body > * + * { margin-top: 1em; }
+.page-footnote { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+/* ============================================================
+ * 11. 後台
+ * ========================================================== */
+.admin { --measure: 100ch; }
+.admin main { overflow-x: auto; }
+.queue { width: 100%; border-collapse: collapse; }
+.queue caption { text-align: left; color: var(--ink-soft); padding-bottom: 8px; }
+.queue th, .queue td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; vertical-align: top; }
+.queue th { font-size: 0.86em; letter-spacing: 0.06em; color: var(--ink-soft); text-transform: none; }
+.queue .body-cell { white-space: pre-wrap; }
+
+.flag {
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 0.8em;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  margin-right: 4px;
+}
+.flag-self_harm { background: var(--warm); color: #fff; border-color: var(--warm); }
+.flag-masked { background: var(--warm-soft); color: #3a2b1d; border-color: var(--warm-soft); }
+.flag-criminal { background: var(--focus); color: #fff; border-color: var(--focus); }
+
+.kw-section { margin-top: 40px; }
+.kw-section textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+.kw-section label { display: block; font-size: 0.9em; color: var(--ink-soft); margin-bottom: 4px; }
+
+/* ---- FPS 讀數（僅 ?fps=1 時出現，驗收用） ---- */
+.fps-badge {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 999;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+  max-width: calc(100vw - 24px);
+}
+
+/* 舊版首頁的 hero（非 shell 版面沿用） */
+.hero { padding: clamp(32px, 8vw, 72px) 0 8px; }
+
+/* ============================================================
+ * 12. 尺寸適應
+ * ========================================================== */
+
+/* 窄螢幕：五顆鼓勵鈕排不下一行時改成換行，讓卡片長高。
+ * ⛔ 寧可少一條軌道也不能把第五顆鼓勵鈕切掉——五種回應全部看得見是 G18 的主軸。
+ * 桌機（>=621px）維持單行、卡片 98px，軌道數不受影響。 */
+@media (max-width: 620px) {
+  .msg-reactions { flex-wrap: wrap; overflow: visible; gap: 5px; }
+  .msg-reaction { padding: 3px 9px; font-size: 0.74em; line-height: 1.4; }
+  /* 工具列在 343px 寬會折成兩排（多吃 29px，手機一條軌道 150px），縮字級讓它回到一排 */
+  .wall-toolbar { gap: 5px; margin-bottom: 4px; }
+  .wall-toolbar button { padding: 4px 11px; font-size: 0.8em; }
+  .wall-toolbar .wall-status { font-size: 0.76em; }
+  /* 手機上卡片會長高（鼓勵鈕換行＋內文折兩行），所以卡片內部一起收緊，
+   * 才能在 375x812 保住兩條軌道。桌機不受影響。 */
+  .msg-card { padding: 8px 12px 6px; }
+  .msg-warmth { margin-top: 3px; font-size: 0.7em; line-height: 1.3; }
+  .msg-reactions { margin-top: 5px; }
+  .wall-tally { font-size: 0.82em; margin-top: 5px; }
+  .composer-bar { padding: 6px 0 8px; }
+  .composer-bar .hint { font-size: 0.76em; }
+  .wall-region .wall-stage { min-height: 280px; }
+}
+
+/* 手機：面板落到底部變 tab bar */
+@media (max-width: 820px) {
+  body.shell-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "simnotice"
+      "demonotice"
+      "main"
+      "panel";
+  }
+  .shell-panel {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    top: auto;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-left: 0;
+    border-top: 1px solid var(--line-strong);
+    box-shadow: var(--shadow-up);
+    overflow-x: auto;
+    z-index: 6;
+  }
+  .shell-panel ul { flex-direction: row; gap: 6px; }
+  .shell-nav-item {
+    white-space: nowrap;
+    padding: 8px 13px;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: var(--radius-sm);
+  }
+  .shell-nav-item:hover { border-left-color: transparent; border-bottom-color: var(--warm-tint); }
+  .shell-nav-item[aria-current="page"] { border-left-color: transparent; border-bottom-color: var(--warm); }
+  .shell-help { margin-top: 0; margin-left: auto; white-space: nowrap; padding: 10px 14px; }
+  .shell-help::before { display: none; }
+  /* 輸入列要墊在 tab bar 上方，不能被蓋住。
+   * padding-bottom 只需要讓開固定的 tab bar（約 64px）——輸入列自己是 sticky，
+   * 在流內已經佔了自己的高度，原本的 126px 等於白白從舞台身上拿走一條軌道。 */
+  .composer-bar { bottom: 64px; }
+  .shell-main { padding-bottom: 66px; }
+  /* 兩條橫幅在 375px 會折成三行、吃掉 77px（半條軌道）。它們是誠信欄位不能拿掉，
+   * 但可以縮成公告的字級。 */
+  .sim-notice, .demo-notice { font-size: 0.82em; line-height: 1.45; padding: 8px var(--gap); }
+  .site-mark { gap: 2px 10px; padding: 6px 0 5px; margin-bottom: 6px; }
+  .site-mark .triage { margin: 5px 0 0; }
+  .triage-item { padding: 7px 11px; }
+  .site-mark .alias-line { font-size: 0.78em; }
+}
+
+/* ============================================================
+ * 13. 減少動態偏好
+ * ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* reduced-motion：不漂浮，改成可讀的靜態排列。
+ * 選擇器排除 .force-motion——那是驗收鉤子（?motion=force）掛的 class，
+ * 真實使用者不會有。用 :not() 排除而不是另外疊一層蓋回去，是因為下面幾條帶
+ * !important，inline style 蓋不過，疊上去只會得到「看起來有改其實沒動」的假象。 */
+@media (prefers-reduced-motion: reduce) {
+  :root:not(.force-motion) .wall-stage { height: auto; min-height: 0; overflow: visible; }
+  :root:not(.force-motion) .wall-plane { position: static; transform: none !important; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); padding: 14px; }
+  :root:not(.force-motion) .msg-card { position: static; width: auto; transform: none !important; }
+  /* 靜態網格的卡片比彈幕窄，鼓勵鈕改成可換行，五顆一樣全部看得見 */
+  :root:not(.force-motion) .msg-reactions { flex-wrap: wrap; overflow: visible; }
+  /* 靜態版沒有橫向流動，左右兩道漸層就沒有意義了 */
+  :root:not(.force-motion) .wall-frame::before,
+  :root:not(.force-motion) .wall-frame::after { display: none; }
+  .msg-reactions { opacity: 1; }
+}
+
+/* ================= 放開舞台高度（2026-08-21）=================
+ * ⛔ 舞台不要再鎖 vh。原本 52vh 是我自己加的限制，不是規格——
+ *    Lee 指出「網頁是可以下拉的」，這句話是對的。鎖住高度的後果是
+ *    軌道數與卡片尺寸互斥，我為了多一軌一路把卡片壓成 580×98 的扁條，
+ *    每一次壓縮都在扣設計感。現在高度由軌道數決定（wall.js 設定），頁面可捲。
+ */
+.wall-region .wall-stage { height: auto; min-height: 320px; }
+
+/* 卡片還原成「一張紙」的比例：可以呼吸，字看得清楚。
+ * 高度變貴的限制沒有了，所以鼓勵鈕可以換行、不必再擠成一條。 */
+.msg-card {
+  width: min(520px, 86vw);
+  padding: 15px 17px;
+}
+.msg-body { font-size: 1em; line-height: 1.75; }
+.msg-reactions { flex-wrap: wrap; overflow: visible; margin-top: 11px; gap: 6px; }
+.msg-reaction { padding: 5px 11px; font-size: 0.85em; }
+.msg-warmth { margin-top: 10px; font-size: 0.84em; }
+
+/* 牆變高之後，工具列跟著捲走會很難用——釘在舞台上緣 */
+.wall-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding: 8px 0;
+  background: var(--paper);
+}
+
+@media (max-width: 820px) {
+  .msg-card { width: min(420px, 88vw); padding: 13px 14px; }
+}
+
+/* ================= 分頁：法律科普與案例的閱讀版面（2026-08-21）=================
+ * 參考 法律白話文運動（plainlaw.oen.tw）實測：內容欄寬 584–632px、
+ * 標題 700 字重、h1 36px / h2 26px。我們原本吃 --measure（68ch ≈ 1088px），
+ * 那個寬度中文讀起來會不斷跳行、眼睛找不到下一行的開頭。
+ */
+/* ⛔ 一定要連 margin-inline: auto 一起寫。上面 258 行的
+ *    `body.shell-layout .shell-main > * { margin-inline: 0 }` 是為了讓彈幕滿版，
+ *    但它同時把分頁的置中也關掉了——結果 640px 的欄靠在 1200px 版面的最左邊。 */
+body.shell-layout .shell-main > main.page-body,
+body.shell-layout .shell-main .page-body,
+.page-body {
+  max-width: 40rem;                     /* ≈ 640px，對齊參考站的欄寬 */
+  margin-inline: auto;
+}
+/* 分頁的 header 也要跟著同一條中線，否則標題貼左、內文置中，看起來像壞掉 */
+body.shell-layout .shell-main > .site-mark:has(+ .page-body),
+.page-body ~ .page-footnote {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.page-body h1 { font-size: clamp(1.6rem, 4vw, 2.15rem); line-height: 1.25; }
+.page-body h2 {
+  font-size: clamp(1.18rem, 2.4vw, 1.42rem);
+  font-weight: 700;
+  margin-top: 2.4em;
+  padding-top: 0.7em;
+  border-top: 2px solid var(--ink);
+}
+.page-body h3 { font-size: 1.06rem; font-weight: 700; margin-top: 1.8em; }
+.page-body p { line-height: 1.85; }
+
+/* 開場段：比內文大一級，用來定調 */
+.lede {
+  font-size: 1.08em;
+  line-height: 1.8;
+  color: var(--ink);
+  border-left: 3px solid var(--warm-tint);
+  padding-left: 14px;
+}
+
+.law-sec { margin-top: 0.5em; }
+
+/* 條文原文：引用要看得出是引用，不是我們自己的話 */
+.law-quote {
+  margin: 1.2em 0;
+  padding: 14px 16px;
+  background: var(--card);
+  border-left: 4px solid var(--warm);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.97em;
+  line-height: 1.8;
+}
+.law-quote cite {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.84em;
+  font-style: normal;
+  color: var(--ink-soft);
+}
+
+.law-list { padding-left: 1.35em; }
+.law-list li { margin-top: 0.6em; line-height: 1.8; }
+.law-list-check { list-style: none; padding-left: 0; }
+.law-list-check li { padding-left: 1.5em; position: relative; }
+.law-list-check li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.62em;
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  background: var(--calm-ink);
+}
+
+/* 法定程序：期限是這一段的主角，所以做成有編號的步驟 */
+.law-steps { list-style: none; counter-reset: s; padding-left: 0; }
+.law-steps > li {
+  counter-increment: s;
+  position: relative;
+  padding-left: 46px;
+  margin-top: 1.3em;
+}
+.law-steps > li::before {
+  content: counter(s);
+  position: absolute;
+  left: 0; top: 0;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--warm);
+  color: #fff;
+  font-size: 0.95em;
+  font-variant-numeric: tabular-nums;
+}
+.law-steps .step-t { display: block; font-weight: 700; padding-top: 5px; }
+.law-steps p { margin: 4px 0 0; font-size: 0.97em; }
+
+.law-note {
+  margin: 1.2em 0;
+  padding: 12px 14px;
+  background: var(--warm-wash);
+  border-radius: var(--radius-sm);
+  font-size: 0.95em;
+  line-height: 1.8;
+}
+
+.law-table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.95em; }
+.law-table caption { text-align: left; color: var(--ink-soft); font-size: 0.88em; padding-bottom: 8px; }
+.law-table th, .law-table td { border-bottom: 1px solid var(--line); padding: 10px 6px; text-align: left; vertical-align: top; }
+.law-table thead th { border-bottom: 2px solid var(--ink); font-weight: 700; }
+.law-table td:first-child { width: 38%; }
+
+/* 求助管道：號碼是要被記住的東西，給它固定寬度與等寬數字 */
+.law-contacts { list-style: none; padding: 0; margin: 1.2em 0; }
+.law-contacts li {
+  display: flex; gap: 14px; align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.law-contacts .c-num {
+  flex: 0 0 4.2em;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--warm-text);
+}
+.law-contacts .c-body { flex: 1 1 auto; line-height: 1.75; }
+.law-sources { border-top: 1px solid var(--line); margin-top: 3em; }
+
+/* ---- 案例頁 ---- */
+.case {
+  margin-top: 2.4em;
+  padding: 18px 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.case h2 { margin-top: 0.2em; border-top: 0; padding-top: 0; }
+.case-tag {
+  display: inline-block;
+  margin: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--warm-wash);
+  color: var(--warm-text);
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.case-dl { margin: 1em 0 0; }
+.case-dl dt {
+  margin-top: 1.15em;
+  font-size: 0.86em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--warm-text);
+}
+.case-dl dd { margin: 4px 0 0; line-height: 1.85; }
+/* 「法律上怎麼看」是每個案件的收束，給它一條邊 */
+.case-dl dt:last-of-type { color: var(--calm-text); }
+.case-dl dd:last-of-type {
+  margin-top: 6px;
+  padding-left: 12px;
+  border-left: 3px solid var(--calm);
+}
+.case-cta {
+  margin-top: 2.4em;
+  padding: 14px 16px;
+  background: var(--warm-wash);
+  border-radius: var(--radius);
+  line-height: 1.85;
+}
+
+/* ---- 分頁插圖（內嵌 SVG）----
+ * ⛔ 一律內嵌 SVG，不要用 <img src>。CSP 是 default-src 'self'，
+ *    而且內嵌才能吃 var(--warm) 這些代幣、跟著配色一起變。
+ */
+.law-hero {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 1.6em;
+}
+
+.case { position: relative; }
+.case-mark {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 64px;
+  height: 64px;
+}
+/* 插圖不能壓到標題。案例標題與標籤讓出右側空間。 */
+.case-tag, .case h2 { max-width: calc(100% - 82px); }
+
+@media (max-width: 560px) {
+  .case-mark { width: 48px; height: 48px; top: 12px; right: 12px; }
+  .case-tag, .case h2 { max-width: calc(100% - 62px); }
+}
+
+/* ---- 用「加寬」換「變矮」，進而換到更多軌道（2026-08-21）----
+ * 520px 寬時五顆鼓勵鈕會折成兩排，卡片高度 162px；加寬到 580px 讓它們排成一行，
+ * 高度掉到約 120px。卡片沒有變擠（padding 與字級不動），只是變得比較寬，
+ * 但每軌省下 40px，在 620px 高的視窗就多一條軌道。
+ * ⛔ 不要再靠縮 padding 或字級去擠軌道——那是 2026-08-20 那條扁條卡的來源。
+ */
+.msg-card { width: min(580px, 88vw); }
+.msg-reactions { flex-wrap: nowrap; }
+
+/* hero 再讓一點高度給牆：代號併進同一行、標題與標語同一行 */
+.site-mark .alias-line { display: inline; margin-left: 10px; }
+.site-mark .wall-scale { flex-basis: auto; }
+
+@media (max-width: 620px) {
+  .msg-card { width: min(440px, 90vw); }
+  .msg-reactions { flex-wrap: wrap; }
+}
+
+/* ---- 卡片垂直瘦身：削「間距」不削「字」（2026-08-24）----
+ * ⛔ 分辨清楚兩種瘦身：縮字級與縮 padding 會讓卡片變擠（2026-08-20 的扁條卡就是那樣）；
+ *    這裡削的是行距與各段之間的空隙，字級與左右 padding 完全不動。
+ *    每省 30px，在一般視窗就多換到一條軌道。
+ */
+.msg-card { padding: 12px 17px; }
+.msg-body { line-height: 1.62; }
+.msg-reactions { margin-top: 8px; }
+.msg-warmth { margin-top: 7px; }
+
+/* 再削 7px：620px 高的視窗差 0.02 條軌道就進得了 3 軌（實測可用 463 ÷ 軌距 155 = 2.98）。
+ * 削的仍然是間距不是字級——左右 padding 與字級一個都沒動。 */
+.msg-card { padding: 10px 17px; }
+.msg-reactions { margin-top: 7px; }
+.msg-warmth { margin-top: 5px; }
+
+/* ================= 牆自己可以上下捲（2026-08-24）=================
+ * Lee：直接讓留言板畫布可以上下移動不可以嗎？——可以，而且比把牆塞進
+ * 剩餘空間乾淨得多。軌道數不再被視窗高度綁死：牆固定佔一個畫面，
+ * 軌道想放幾條放幾條，看不完的往下捲。
+ *
+ * ⛔ 淡出掛在 .wall-frame（不捲動）而不是 .wall-stage（捲動），
+ *    否則兩道漸層會跟著內容一起捲走。
+ */
+.wall-frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  border: 1px solid var(--stage-edge);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.wall-region .wall-frame + * { margin-top: 8px; }
+
+.wall-stage {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;   /* 捲到底不要把整個頁面帶著跑 */
+  border: 0;
+  border-radius: 0;
+  scrollbar-width: thin;
+}
+/* 漂浮模式要能用手指上下捲；畫布模式才需要攔截手勢做拖曳平移 */
+.wall-stage[data-mode="danmaku"] { touch-action: pan-y; }
+.wall-stage[data-mode="board"]   { touch-action: none; }
+
+/* 平面撐開成完整軌道高度，捲動就是在捲它。
+ * ⛔ 必須把 bottom 放掉：.wall-plane 是 inset:0，top 與 bottom 同時成立時
+ *    height 會被忽略，平面永遠等於舞台高度，最後一軌就會被切掉 28px。 */
+.wall-stage[data-mode="danmaku"] .wall-plane {
+  bottom: auto;
+  height: var(--plane-h, 100%);
+}
+
+/* ⛔ hidden 屬性必須永遠贏。
+ * 任何自訂的 display（例如 .site-mark 的 flex）都會蓋過瀏覽器預設的
+ * [hidden]{display:none}，元素明明標了 hidden 卻還在畫面上——
+ * 而且用 el.hidden 檢查會回報 true，看起來像修好了（2026-08-24 踩到）。 */
+[hidden] { display: none !important; }
+
+/* ---- 我說過的話 ---- */
+.share-state { margin: 4px 0 0; font-size: 0.84em; color: var(--calm-text); }
+.share-item.is-pending { border-style: dashed; }
+.share-item.is-pending .share-state { color: var(--warm-text); }
+
+
+/* ⛔ 靜態退路必須跳過捲動外框。
+ * .wall-frame 的 overflow:hidden ＋ flex 固定高度是為了「牆自己上下捲」而加的，
+ * 但 reduced-motion 的退路是把留言攤成一個很高的靜態網格——被那個外框一裁，
+ * 60 張卡有 51 張直接消失（2026-08-24 實測）。
+ * 加任何裁切／固定高度的容器時，都要回來確認這一段。 */
+@media (prefers-reduced-motion: reduce) {
+  :root:not(.force-motion) .wall-frame {
+    overflow: visible;
+    flex: none;
+    border: 0;
+    border-radius: 0;
+  }
+  :root:not(.force-motion) .wall-stage {
+    overflow: visible;
+    height: auto !important;
+  }
+}
+
+/* ---- 卡片署名 ----
+ * 作者要能在牆上認出「那句是我說的」。代號是本機生成、不可識別的，
+ * 顯示它不會削弱匿名承諾——反而是說出來之後唯一的回音。
+ */
+.msg-who {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 7px 0 0;
+  font-size: 0.82em;
+  color: var(--ink-soft);
+}
+.who-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warm-tint);
+}
+.who-mine {
+  margin-left: 2px;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--calm-ink);
+  color: #fff;
+  font-size: 0.92em;
+}
+/* 自己的留言在牆上要一眼認得出來 */
+.msg-card.is-mine {
+  border-color: var(--calm-ink);
+  box-shadow: var(--shadow-2), 0 0 0 1px var(--calm-ink);
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我說過的話</title>
+<meta name="description" content="只能分享你自己的留言。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="shell-layout">
+
+
+<div class="shell-main">
+  <header class="site-mark">
+    <p class="hint"><a href="index.html">← 回到這面牆</a></p>
+    <h1>我說過的話</h1>
+  </header>
+
+  <main class="page-body">
+    <p class="lede">你在這台裝置上說過的話會留在這裡。這一頁只給你自己看，
+      是為了讓你知道那些話還在、走到哪一步了。</p>
+    <p class="hint">留言送出後會先經過人工檢視，通過才會出現在牆上。檢視期間它也會列在這裡，
+      你不會找不到自己剛剛說的話。</p>
+    <p class="hint">這裡沒有分享或下載——說出來這件事的重量不該變成一張可以轉發的圖。
+      這面牆會替你留著。</p>
+    <ul class="share-list" data-share-list></ul>
+    <p class="hint" data-share-empty>你還沒有在這台裝置上說過話。<a href="index.html#compose">現在說一句</a>也可以。</p>
+  </main>
+
+</div>
+
+<div data-shell></div>
+
+<dialog class="help-dialog" data-help-dialog aria-labelledby="help-dlg-h">
+  <h2 id="help-dlg-h">如果你現在很不好受</h2>
+  <p class="hint" data-help-why></p>
+  <ul class="help-lines">
+    <li><a href="tel:1925">衛福部安心專線 1925</a></li>
+    <li><a href="tel:1995">生命線 1995</a></li>
+    <li><a href="tel:1980">張老師專線 1980</a></li>
+  </ul>
+  <p class="hint">24 小時，免付費。你不需要準備好才打。</p>
+  <button type="button" data-help-close>我知道了</button>
+</dialog>
+
+<script src="content.js"></script>
+<script src="js/schema.js"></script>
+<script src="js/keywords.js"></script>
+<script src="js/data-provider.js"></script>
+<script src="js/guard.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/wall.js"></script>
+<script src="js/share.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

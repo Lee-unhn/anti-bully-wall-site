@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>這面牆</title>
+<meta name="description" content="匿名說出被霸凌的經歷，其他人只能給你溫暖。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="shell-layout">
+
+<p class="demo-notice" data-c="demoNotice" hidden></p>
+
+<div class="shell-main">
+
+  <header class="site-mark">
+    <h1 data-c="site.title">—</h1>
+    <p class="tagline" data-c="site.tagline">—</p>
+    <p class="wall-scale" data-wall-scale>—</p>
+    <ul class="triage" data-c="triage"></ul>
+    <p class="alias-line">你在這裡叫做 <strong data-c="alias">—</strong>，沒有人知道那是誰。</p>
+  </header>
+
+  <main>
+
+  <section id="wall" class="wall-region" aria-labelledby="wall-h">
+    <h2 id="wall-h" class="sr-only">留言牆</h2>
+
+    <div class="wall-toolbar" role="group" aria-label="檢視方式">
+      <button type="button" data-wall-mode="danmaku" aria-pressed="true">流動</button>
+      <button type="button" data-wall-mode="board" aria-pressed="false">全部攤開</button>
+      <button type="button" data-wall-reset>回到原點</button>
+      <span class="wall-status hint" data-c="wall.status">載入中…</span>
+    </div>
+
+    <!-- wall-frame 不捲動，只負責左右兩道淡出；捲動的是裡面的 wall-stage。
+         淡出若直接掛在捲動容器上會跟著內容一起捲走。 -->
+    <div class="wall-frame">
+      <div class="wall-stage" data-wall-stage></div>
+    </div>
+
+  </section>
+
+  <!-- 送出入口常駐在底部：這個站的核心動作是「說出來」，藏進對話框會掉轉換 -->
+  <section id="compose" class="composer-bar" aria-labelledby="compose-h">
+    <h2 id="compose-h" class="sr-only">說你想說的</h2>
+    <form class="compose" data-compose>
+      <label for="compose-body" data-c="wall.composePrompt">—</label>
+      <div class="composer-row">
+        <textarea id="compose-body" name="body" rows="1" required></textarea>
+        <button type="submit">送出</button>
+      </div>
+      <span class="hint" data-compose-count>0 / 300</span>
+    </form>
+    <p class="notice" data-compose-notice hidden></p>
+  </section>
+
+  </main>
+
+</div>
+
+<!-- 右側面板（桌機）／底部 tab（手機）由 shell.js 從 content.nav 注入 -->
+<div data-shell></div>
+
+<dialog class="help-dialog" data-help-dialog aria-labelledby="help-dlg-h">
+  <h2 id="help-dlg-h">如果你現在很不好受</h2>
+  <p class="hint" data-help-why></p>
+  <ul class="help-lines">
+    <li><a href="tel:1925">衛福部安心專線 1925</a></li>
+    <li><a href="tel:1995">生命線 1995</a></li>
+    <li><a href="tel:1980">張老師專線 1980</a></li>
+  </ul>
+  <p class="hint">24 小時，免付費。你不需要準備好才打。</p>
+  <button type="button" data-help-close>我知道了</button>
+</dialog>
+
+<script src="content.js"></script>
+<script src="js/schema.js"></script>
+<script src="js/keywords.js"></script>
+<script src="js/data-provider.js"></script>
+<script src="js/guard.js"></script>
+<script src="js/shell.js"></script>
+<script src="js/wall.js"></script>
+<script src="js/share.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
