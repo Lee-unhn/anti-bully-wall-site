@@ -63,6 +63,45 @@
   --draft-bg:    #f7dcae;
   --draft-ink:   #4a3a1c;
 
+  /* --- 分頁主色（2026-08-25 新增）---
+   * ⛔ 這兩個色代表「你在哪一頁」，不代表任何狀態。
+   *    首頁教會使用者「金＝還沒有人回應／松青＝已經有人回應」；分頁主色一旦跑到
+   *    牆上或任何可點元素的字色上，那條規則就會退化成裝飾。
+   *    准許位置只有三處：面板當前項左緣、h1 左緣、h2 章節橫條。閘門 G27 在守。
+   * 對比（紙 #faf4ed／卡 #fffaf3／面板 #f2e9e1／承白字）：
+   *   --case-ink 5.90／6.20／5.37／6.44
+   *   --mine-ink 5.62／5.91／5.12／6.14
+   * 兩者都是 Rosé Pine Dawn 的色相加深而來（原色 love 3.84、iris 3.47 皆不到 AA）。 */
+  --case-ink:    #8c4a5f;   /* cases.html */
+  --mine-ink:    #6a5a86;   /* mine.html */
+
+  /* --- 面板底：與 --stage 同值，不新增色相 ---
+   * ⛔ --warm 放在它上面只有 4.44:1，不過 AA。面板裡的橘字一律要先坐上
+   *    --card(5.12) 或 --warm-wash(4.72)。 */
+  --panel:       #f2e9e1;
+
+  /* --- 求助鈕第二行的號碼：在 --warm 上 4.77:1 ---
+   * ⛔ 不可改成 rgba(255,255,255,.9)——半透明疊色算不出可稽核的比值。 */
+  --help-num:    #fdf1e0;
+
+  /* --- 留白：六級，全站只用這六個值 ---
+   * 節與節 64、子節 24、段落 16。取值以外的間距一律視為違規。 */
+  --sp-1: 8px;
+  --sp-2: 12px;
+  --sp-3: 16px;
+  --sp-4: 24px;
+  --sp-5: 32px;
+  --sp-6: 64px;
+
+  /* --- 字階：五級離散值（17px 基準 ＝ 34／22／17／15／13.6px）---
+   * ⛔ 分頁不再用 clamp()：連續值量不出「這是第幾級」，也就沒有階可言。
+   *    首頁的彈幕相關字級不吃這一組（那裡的尺寸由軌道高度反推）。 */
+  --fs-1: 2rem;
+  --fs-2: 1.3rem;
+  --fs-3: 1rem;
+  --fs-4: 0.88rem;
+  --fs-5: 0.8rem;
+
   /* --- 形狀、節奏、陰影 --- */
   --radius:      12px;
   --radius-sm:   7px;
@@ -260,7 +299,14 @@ body.shell-layout .shell-main > main {
   min-height: 0;
 }
 
-/* ---- 右側面板 ---- */
+/* ---- 右側面板：四段式垂直軌 ----
+ * 由上到下＝識別 → 動作 → 去處 → 求助。四段的視覺重量刻意不相等：
+ * 只有「說出你的事」有外框、只有求助鈕是實色，其餘是安靜的目錄項。
+ *
+ * ⛔ 面板底是 --panel(#f2e9e1)，--warm(#9c5c08) 放在它上面只有 4.44:1，不過 AA。
+ *    面板裡任何橘字都必須先坐上一塊淺底（--card 5.12／--warm-wash 4.72）才合格。
+ *    改面板配色前先跑 node scripts/a11y-probe.js，並自己算一次比值。
+ */
 .shell-panel {
   position: sticky;
   top: 0;
@@ -268,63 +314,181 @@ body.shell-layout .shell-main > main {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: clamp(16px, 2.4vw, 26px) 14px 20px;
-  background: var(--card);
+  padding: var(--sp-4) var(--sp-3) var(--sp-3);
+  background: var(--panel);
   border-left: 1px solid var(--line);
+  /* 項目多到超過一個畫面時要捲得動，否則求助鈕會被擠出視窗外 */
+  overflow-y: auto;
 }
-.shell-panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
 
-/* 導覽項改成「左緣指示條」而不是整塊填色的方鈕：
- * 一排同樣圓角同樣 1px 灰邊的方鈕就是最典型的預設 UI 長相。 */
-.shell-nav-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 10px 13px;
-  border: 0;
-  border-left: 3px solid transparent;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.97em;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.14s ease, border-color 0.14s ease;
+/* ---- 段一：識別 ----
+ * 全站唯一常駐的元件，理當承載站名。分頁的頁首因此不必再重複一次站名。 */
+.shell-brand {
+  padding: 0 var(--sp-1) var(--sp-3);
+  border-bottom: 1px solid var(--line);
 }
-.shell-nav-item:hover { background: var(--warm-wash); border-left-color: var(--warm-tint); }
-.shell-nav-item[aria-current="page"] {
+.shell-brand-name {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  color: var(--ink);              /* --panel 上 6.07:1 */
+}
+/* 站名前的豎線＝整站的識別記號，跟留言卡左緣是同一個語彙 */
+.shell-brand-name::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 5px;
+  height: 1.05em;
+  border-radius: 2px;
+  background: var(--warm);        /* 色條非文字，--panel 上 4.44:1 ≥ 3 */
+}
+.shell-brand-tag {
+  margin: 6px 0 0;
+  font-size: 0.85em;
+  line-height: 1.5;
+  color: var(--ink-soft);         /* --panel 上 4.53:1，過但貼線，⛔ 不可再調淺 */
+}
+
+.shell-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ---- 段二：動作 ----
+ * 「說出你的事」是動作不是去處，所以它是面板上唯一的外框鈕。
+ * ⛔ 底色不可拿掉：--warm-text 直接放在面板底上只有 4.44:1，
+ *    是這塊 --warm-wash(4.72:1) 把它撐過 AA 的。 */
+.shell-nav-li--action { margin: var(--sp-3) 0 var(--sp-4); }
+/* ⛔ 這幾條必須比 .shell-nav-item 更高權重（多掛一層 .shell-panel）。
+ *    兩者同為 0,1,0 時後定義的贏，而基底 .shell-nav-item 寫在下面一段——
+ *    外框與底色會被 border:0 / background:transparent 靜默吃掉，
+ *    畫面上看起來就是「外框鈕沒有外框」，而且不會有任何錯誤。 */
+.shell-panel .shell-nav-item--action {
+  border: 1px solid var(--warm);
+  border-radius: var(--radius-sm);
   background: var(--warm-wash);
-  border-left-color: var(--warm);
-  color: var(--warm-text);        /* 5.41:1 */
+  color: var(--warm-text);        /* --warm-wash 上 4.72:1 */
   font-weight: 700;
 }
+.shell-panel .shell-nav-item--action .shell-nav-note { color: var(--warm-text); opacity: 0.85; }
+.shell-panel .shell-nav-item--action:hover { background: var(--card); }   /* --card 上 5.12:1 */
 
-/* 求助鈕釘在面板底部並與導覽拉開距離——它不是「其中一個去處」。
+/* ---- 段三：去處 ----
+ * 每一項＝24px 圖標 ＋ 標籤 ＋ 一行說明。有了說明行，這一列就不再讀成按鈕。 */
+.shell-nav-item {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: start;
+  gap: 0 12px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  border-left: 4px solid transparent;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: transparent;
+  color: var(--ink);              /* --panel 上 6.07:1 */
+  font: inherit;
+  font-size: 1em;
+  letter-spacing: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  /* ⛔ 只動 background-color 與 border-color：不做位移，面板每頁都在，
+   *    常駐元件上的位移動畫會變成整站的抖動。 */
+  transition: background-color 0.14s ease, border-color 0.14s ease;
+}
+.shell-nav-icon {
+  grid-row: span 2;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  color: var(--ink-soft);         /* 線稿非文字，--panel 上 4.53:1 ≥ 3 */
+}
+.shell-nav-label { display: block; font-size: 0.97em; line-height: 1.45; }
+.shell-nav-note {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.8em;
+  line-height: 1.45;
+  color: var(--ink-soft);         /* --panel 上 4.53:1 */
+}
+/* 桌機用完整標籤，手機用 short——同一份 DOM，兩種長度 */
+.shell-nav-item .nav-short { display: none; }
+
+.shell-nav-item:hover { background: var(--warm-wash); }
+
+/* 當前項＝整列換成白卡＋左緣 4px 該頁主色。
+ * ⛔ 白卡不是裝飾，是對比的必要條件：橘字只有坐在 --card 上才有 5.12:1。 */
+.shell-nav-item[aria-current="page"] {
+  background: var(--card);
+  border-left-color: var(--warm);
+  box-shadow: var(--shadow-1);
+}
+.shell-nav-item[aria-current="page"] .shell-nav-label {
+  color: var(--warm-text);        /* --card 上 5.12:1 */
+  font-weight: 700;
+}
+.shell-nav-item[aria-current="page"] .shell-nav-icon { color: var(--warm-text); }
+/* 分頁主色的准許位置之一：面板當前項左緣（其餘兩處＝h1 左緣、h2 章節橫條）。
+ * ⛔ 只准出現在 border-left-color，不得成為任何可點元素的前景色（閘門 G27 在守）。 */
+.shell-nav-item[data-nav-id="cases"][aria-current="page"] { border-left-color: var(--case-ink); }
+.shell-nav-item[data-nav-id="law"][aria-current="page"]   { border-left-color: var(--calm-ink); }
+
+/* ---- 段四：求助 ----
+ * 釘在面板底部並與導覽拉開距離——它不是「其中一個去處」。
  * 整個面板只有它是實色，視覺份量刻意最重。 */
 .shell-help {
   position: relative;
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
   background: var(--warm);
-  color: #fff;                    /* 5.02:1 */
+  color: #fff;                    /* --warm 上 5.32:1 */
   border: 0;
   border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  padding: 13px 15px;
   font: inherit;
   font-weight: 700;
   text-align: left;
-  line-height: 1.45;
+  line-height: 1.4;
+  letter-spacing: inherit;
   cursor: pointer;
   box-shadow: var(--shadow-1);
+  transition: box-shadow 0.14s ease;
 }
 .shell-help::before {
   content: "";
   position: absolute;
-  left: 0; right: 0; top: -16px;
+  left: 0; right: 0; top: calc(var(--sp-3) * -1);
   border-top: 1px solid var(--line);
 }
-.shell-help:hover { background: var(--warm-text); }
+.shell-help:hover { box-shadow: var(--shadow-2); }
+.shell-help-text { display: block; }
+.shell-help-t { display: block; }
+/* 號碼印在鈕上，不必先點開對話框才看得到（Kids Helpline 的做法）。
+ * ⛔ 用實色 --help-num 而不是 rgba(255,255,255,.9)：半透明白算不出可稽核的比值。 */
+.shell-help-n {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.82em;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--help-num);         /* --warm 上 4.77:1 */
+}
+/* 桌機不用圖標——鈕上已經有兩行字。圖標是給手機圓鈕用的。 */
+.shell-help-icon { display: none; }
 
 /* ============================================================
  * 6. 首屏：站名、規模、身分分流
@@ -878,33 +1042,124 @@ body.shell-layout .shell-main .page-body { max-width: var(--measure); }
       "main"
       "panel";
   }
+  /* ---- 手機：面板落到底部成固定四格 tab bar ----
+   * ⛔ 拿掉 overflow-x: auto。橫捲的 tab bar 會讓最後一項在 375px 上直接看不見，
+   *    而且沒有任何視覺提示說明右邊還有東西。改成等寬格子：放不下就縮字，不藏。
+   * ⛔ 高度鎖 64px：composer-bar 的 bottom、shell-main 的 padding-bottom 與
+   *    浮動求助鈕的 bottom 全部以這個數字為基準，浮動就會互相蓋住。 */
   .shell-panel {
     position: fixed;
     left: 0; right: 0; bottom: 0;
     top: auto;
     height: auto;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    display: block;
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
+    background: var(--card);       /* ⛔ 不可改成 --panel：當前項的橘字在它上面只有 4.44:1 */
     border-left: 0;
     border-top: 1px solid var(--line-strong);
     box-shadow: var(--shadow-up);
-    overflow-x: auto;
+    overflow: visible;
     z-index: 6;
   }
-  .shell-panel ul { flex-direction: row; gap: 6px; }
-  .shell-nav-item {
-    white-space: nowrap;
-    padding: 8px 13px;
-    border-left: 0;
-    border-bottom: 3px solid transparent;
-    border-radius: var(--radius-sm);
+  /* 站名在手機上由頁面自己的標題承擔，tab bar 只放去處 */
+  .shell-brand { display: none; }
+
+  /* 等寬格子，欄數跟著項目數走。
+   * ⛔ 不要寫死 repeat(4, 1fr)：nav 的項目數會隨時期變動，寫死之後
+   *    多一項會溢出、少一項會留一格空白。 */
+  .shell-panel ul {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    align-items: center;
+    gap: 0;
+    min-height: 64px;
   }
-  .shell-nav-item:hover { border-left-color: transparent; border-bottom-color: var(--warm-tint); }
-  .shell-nav-item[aria-current="page"] { border-left-color: transparent; border-bottom-color: var(--warm); }
-  .shell-help { margin-top: 0; margin-left: auto; white-space: nowrap; padding: 10px 14px; }
+  .shell-nav-li--action { margin: 0; }
+
+  /* ⛔ 這幾條都要帶 .shell-panel。桌機那組動作鈕樣式是
+   *    .shell-panel .shell-nav-item--action（0,2,0），而 media query
+   *    本身不加權重——只寫 .shell-nav-item--action（0,1,0）會輸給它，
+   *    手機上那一格就會維持外框＋底色，在四格並排時變成唯一被框起來的一格。 */
+  .shell-panel .shell-nav-item,
+  .shell-panel .shell-nav-item--action {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 3px 0;
+    padding: 8px 2px 11px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: center;
+    color: var(--ink);             /* --card 上 7.00:1 */
+  }
+  .shell-nav-icon { grid-row: auto; margin-top: 0; }
+  .shell-nav-note { display: none; }
+  .shell-nav-item .nav-full  { display: none; }
+  .shell-nav-item .nav-short { display: inline; }
+  .shell-nav-label {
+    font-size: 0.72em;
+    line-height: 1.25;
+    letter-spacing: 0.14em;
+    white-space: nowrap;
+  }
+  .shell-panel .shell-nav-item--action .shell-nav-label { font-weight: 400; }
+  .shell-panel .shell-nav-item--action .shell-nav-note  { color: inherit; }
+  .shell-panel .shell-nav-item:hover,
+  .shell-panel .shell-nav-item--action:hover { background: var(--warm-wash); }
+
+  /* 當前項＝圖標與標籤上橘、外加一條 16px×3px 短線，
+   * 取代原本整寬的 border-bottom（整寬的線在四格並排時會連成一條，讀不出哪一格） */
+  .shell-panel .shell-nav-item[aria-current="page"],
+  .shell-panel .shell-nav-item[data-nav-id="cases"][aria-current="page"],
+  .shell-panel .shell-nav-item[data-nav-id="law"][aria-current="page"] {
+    background: transparent;
+    border-left-color: transparent;
+    box-shadow: none;
+  }
+  .shell-nav-item[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--warm);       /* --card 上 5.12:1，非文字 ≥ 3 */
+  }
+
+  /* ---- 求助＝56px 圓形浮鈕，釘在 tab bar 正上方右側 ----
+   * 它是全站唯一的浮動元素，視覺優先權因此最高；也保住「求助常駐每一頁」的裁定。
+   * ⛔ 不進 tab bar：進了就變成「四個去處之一」，那正是我們不要的讀法。 */
+  .shell-help {
+    position: fixed;
+    right: 12px;
+    bottom: calc(64px + 12px + env(safe-area-inset-bottom, 0px));
+    z-index: 7;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    box-shadow: var(--shadow-3);
+  }
   .shell-help::before { display: none; }
+  .shell-help-icon { display: block; width: 26px; height: 26px; }
+  /* 文字留在 DOM 裡當可讀名稱，只是不畫出來——
+   * ⛔ 不可改用 display:none 或 font-size:0，那會讓這顆鈕在報讀器上變成無名按鈕。 */
+  .shell-help-text {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   /* 輸入列要墊在 tab bar 上方，不能被蓋住。
    * padding-bottom 只需要讓開固定的 tab bar（約 64px）——輸入列自己是 sticky，
    * 在流內已經佔了自己的高度，原本的 126px 等於白白從舞台身上拿走一條軌道。 */
@@ -978,87 +1233,248 @@ body.shell-layout .shell-main .page-body { max-width: var(--measure); }
   .msg-card { width: min(420px, 88vw); padding: 13px 14px; }
 }
 
-/* ================= 分頁：法律科普與案例的閱讀版面（2026-08-21）=================
- * 參考 法律白話文運動（plainlaw.oen.tw）實測：內容欄寬 584–632px、
- * 標題 700 字重、h1 36px / h2 26px。我們原本吃 --measure（68ch ≈ 1088px），
- * 那個寬度中文讀起來會不斷跳行、眼睛找不到下一行的開頭。
+/* ================= 分頁：可以跳著讀的說明，不是一篇文章（2026-08-25）=================
+ * 主張：這三頁要讀起來像一份「有編號、可以跳著讀」的說明。每頁頂端給出可點的
+ * 章節清單，每個章節開頭是一條該頁顏色的短橫條 ＋ 一個編號，
+ * 除此之外全站只有一種字體、五級字階、三種色條用法。
+ *
+ * 三種色條用法（超出這三種即為違規）：
+ *   1. 4-5px 左緣豎線 ＝ 引用／狀態／當前頁
+ *   2. 40px x 3px 橫條 ＝ 章節開頭
+ *   3. 16px x 3px 短線 ＝ 手機 tab 當前項
+ *
+ * ⛔ 分頁主色（--calm-ink／--case-ink／--mine-ink）只准出現在三個位置：
+ *    面板當前項左緣、h1 左緣、h2 章節橫條。閘門 G27 在守這件事。
+ *    理由寫在 :root 的代幣註解：顏色在首頁已經被賦予「回應狀態」的意義，
+ *    分頁主色一旦擴散，那條規則就會退化成裝飾。
  */
-/* ⛔ 一定要連 margin-inline: auto 一起寫。上面 258 行的
+
+/* ⛔ 一定要連 margin-inline: auto 一起寫。上面
  *    `body.shell-layout .shell-main > * { margin-inline: 0 }` 是為了讓彈幕滿版，
  *    但它同時把分頁的置中也關掉了——結果 640px 的欄靠在 1200px 版面的最左邊。 */
 body.shell-layout .shell-main > main.page-body,
 body.shell-layout .shell-main .page-body,
 .page-body {
-  max-width: 40rem;                     /* ≈ 640px，對齊參考站的欄寬 */
+  max-width: 40rem;                     /* 約 640px，對齊參考站的欄寬 */
   margin-inline: auto;
 }
-/* 分頁的 header 也要跟著同一條中線，否則標題貼左、內文置中，看起來像壞掉 */
+/* 分頁的 header 與頁尾註也要跟著同一條中線，否則標題貼左、內文置中，看起來像壞掉 */
+/* ⛔ 這一組每一條都要帶 body.shell-layout .shell-main >：
+ *    上面那條 `.shell-main > * { max-width: none }` 是 0,2,1，
+ *    只寫 .page-footnote（0,1,0）會輸給它——頁尾註於是攤成 909px，
+ *    而內文是 640px，兩條中線對不上（實測 x=32/w=909 vs x=167/w=640）。 */
 body.shell-layout .shell-main > .site-mark:has(+ .page-body),
+body.shell-layout .shell-main > .page-head,
+body.shell-layout .shell-main > .page-footnote,
+.page-head,
 .page-body ~ .page-footnote {
   max-width: 40rem;
   margin-inline: auto;
+  /* ⛔ width:100% 不可拿掉。.shell-main 是 column flex，子項本來會被 stretch 拉滿，
+   *    但只要給了 margin-inline:auto，交叉軸的 auto margin 就會取代 stretch，
+   *    元素改成「縮到內容寬」——頁首因此只有 427px 而內文是 640px，
+   *    兩者中線對不上，看起來像標題被推歪了（實測 getBoundingClientRect 抓到）。 */
+  width: 100%;
 }
 
-.page-body h1 { font-size: clamp(1.6rem, 4vw, 2.15rem); line-height: 1.25; }
-.page-body h2 {
-  font-size: clamp(1.18rem, 2.4vw, 1.42rem);
+/* ---- 頁首帶 ----
+ * 站名已經由常駐面板承擔，分頁頁首因此只留「回去的路 → 標題 → 一行說明」。
+ * ⛔ class 保留 site-mark：build-onefile.js 靠它把分頁頁首抓進單檔預覽。 */
+.page-head {
+  display: block;
+  padding: var(--sp-4) 0 0;
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+.page-back { margin: 0; font-size: var(--fs-4); line-height: 1.6; }
+.page-head h1 {
+  margin: var(--sp-2) 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-1);
+  line-height: 1.25;
   font-weight: 700;
-  margin-top: 2.4em;
-  padding-top: 0.7em;
-  border-top: 2px solid var(--ink);
+  letter-spacing: 0.005em;
 }
-.page-body h3 { font-size: 1.06rem; font-weight: 700; margin-top: 1.8em; }
-.page-body p { line-height: 1.85; }
+/* 分頁主色的准許位置之二：h1 左緣。
+ * 與面板當前項的左緣同色——面板與內容因此互相指認「你在哪一頁」。 */
+.page-head h1::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 4px;
+  height: 1em;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.page-head--law   h1::before { background: var(--calm-ink); }   /* 紙上 5.59:1 */
+.page-head--cases h1::before { background: var(--case-ink); }   /* 紙上 5.90:1 */
+.page-head--mine  h1::before { background: var(--mine-ink); }   /* 紙上 5.62:1 */
+.page-sub {
+  margin: var(--sp-1) 0 0;
+  font-size: 0.95em;
+  line-height: 1.7;
+  color: var(--ink-soft);               /* 紙上 4.98:1 */
+}
+.page-head::after {
+  content: "";
+  display: block;
+  margin-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
 
-/* 開場段：比內文大一級，用來定調 */
+/* ---- 章節清單 ----
+ * ⛔ 不做 <details> 收合：折起來 Ctrl+F 找不到，法規與求助資訊不該被藏。
+ * ⛔ 也不做 sticky 側欄：sticky 左欄會把 40rem 內容欄推離視窗中線，
+ *    而「內容欄置中」是硬規格。清單留在內容欄裡，所有寬度一致。 */
+.page-toc { margin: var(--sp-5) 0; }
+.page-toc-h {
+  margin: 0 0 var(--sp-1);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.page-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: toc;
+  border-top: 1px solid var(--line);
+}
+.page-toc li { counter-increment: toc; border-bottom: 1px solid var(--line); }
+.page-toc a {
+  display: grid;
+  grid-template-columns: 2.6em 1fr;
+  align-items: baseline;
+  padding: 10px 2px;
+  text-decoration: none;
+  color: var(--link);                   /* 紙上 5.59:1 */
+  transition: background-color 0.14s ease;
+}
+.page-toc a::before {
+  content: counter(toc, decimal-leading-zero);
+  font-size: var(--fs-4);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);               /* 紙上 4.98:1 */
+}
+.page-toc a span { text-decoration: underline; text-underline-offset: 3px; }
+.page-toc a:hover { background: var(--warm-wash); }
+
+/* ---- 內文字階與節奏 ----
+ * 留白三級：節與節 64／子節 24／段落 16。 */
+.page-body h1 { font-size: var(--fs-1); line-height: 1.25; }
+/* 章節開頭＝橫條 → 編號 → 標題。
+ * ⛔ 拿掉原本的 border-top: 2px solid var(--ink)：640px 的欄裡連續四條重黑線
+ *    會把版面切成四塊磚，讀起來是被切斷而不是被分段。 */
+.page-body h2 {
+  font-size: var(--fs-2);
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: var(--sp-6);
+  padding-top: 0;
+  border-top: 0;
+}
+.page-body { counter-reset: sec; }
+/* 一個 ::before 同時做完橫條與編號：橫條是背景漸層（固定 40x3），編號是 content。
+ * 編號用 counter 產生，HTML 不寫死數字——插一節不必重編。 */
+.page-sec-h::before {
+  counter-increment: sec;
+  content: "第" counter(sec, cjk-decimal) "節";
+  display: block;
+  padding-top: 21px;
+  margin-bottom: var(--sp-2);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);               /* 紙上 4.98:1 */
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-size: 40px 3px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+}
+/* 分頁主色的准許位置之三：h2 章節橫條（非文字，對紙 >= 3:1）。 */
+.page-body--law   .page-sec-h::before { background-image: linear-gradient(var(--calm-ink), var(--calm-ink)); }
+.page-body--cases .page-sec-h::before { background-image: linear-gradient(var(--case-ink), var(--case-ink)); }
+.page-body--mine  .page-sec-h::before { background-image: linear-gradient(var(--mine-ink), var(--mine-ink)); }
+/* 案例頁的編號詞不一樣：那不是「節」，是一件一件的事 */
+.page-body--cases .page-sec-h::before { content: "案件" counter(sec, cjk-decimal); }
+
+.page-body h3 { font-size: 1.06rem; font-weight: 700; margin-top: var(--sp-4); }
+.page-body p { line-height: 1.85; }
+.page-body > * + * { margin-top: var(--sp-3); }
+/* ⛔ 章節清單與出血區塊要留節級留白。上面那條  寫在它們後面，
+ *    只寫在各自區塊裡的 margin 會被它蓋掉 margin-top（同權重、後者勝）。 */
+.page-body > .page-toc { margin-top: var(--sp-5); }
+.page-body > .law-help-bleed,
+.page-body > .law-sec,
+.page-body > .mine-sec,
+.page-body > .case { margin-top: var(--sp-6); }
+
+/* 開場段：單純大一級的段落。
+ * ⛔ 拿掉原本的左框——左框在新系統裡專屬「引用與提醒」，開場段用了就分不出來。 */
 .lede {
   font-size: 1.08em;
   line-height: 1.8;
-  color: var(--ink);
-  border-left: 3px solid var(--warm-tint);
-  padding-left: 14px;
+  color: var(--ink);                    /* 紙上 6.66:1 */
+  border-left: 0;
+  padding-left: 0;
 }
 
-.law-sec { margin-top: 0.5em; }
+.law-sec { margin-top: var(--sp-6); }
+.law-sec > * + * { margin-top: var(--sp-3); }
 
-/* 條文原文：引用要看得出是引用，不是我們自己的話 */
-.law-quote {
-  margin: 1.2em 0;
-  padding: 14px 16px;
-  background: var(--card);
-  border-left: 4px solid var(--warm);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+/* ---- 全頁只留兩種框，形狀相同、顏色不同 ----
+ * .law-quote ＝ 法條原文（暖橘左條）
+ * .law-note  ＝ 我們對你說的話（松青左條）
+ * ⛔ 兩者都無底色、無圓角、無卡片。原本四種框（白卡引用／暖底 note／左框 lede／
+ *    白卡 case）在同一頁互相打架，讀者分不出哪一句是法律、哪一句是我們。 */
+.law-quote,
+.law-note {
+  margin: var(--sp-4) 0;
+  padding: 2px 0 2px var(--sp-3);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-left: 5px solid var(--warm);   /* 紙上 4.87:1，非文字 >= 3 */
   font-size: 0.97em;
-  line-height: 1.8;
+  line-height: 1.85;
+  color: var(--ink);                    /* 無底色時 --ink 在紙上 6.66:1 */
 }
+.law-note { border-left-color: var(--calm-ink); font-size: 0.95em; }  /* 紙上 5.59:1 */
 .law-quote cite {
   display: block;
-  margin-top: 8px;
+  margin-top: var(--sp-1);
   font-size: 0.84em;
   font-style: normal;
   color: var(--ink-soft);
 }
 
 .law-list { padding-left: 1.35em; }
-.law-list li { margin-top: 0.6em; line-height: 1.8; }
+.law-list li { margin-top: 0.6em; line-height: 1.85; }
 .law-list-check { list-style: none; padding-left: 0; }
 .law-list-check li { padding-left: 1.5em; position: relative; }
 .law-list-check li::before {
   content: "";
   position: absolute;
-  left: 0; top: 0.62em;
+  left: 0; top: 0.66em;
   width: 9px; height: 9px;
   border-radius: 2px;
   background: var(--calm-ink);
 }
 
-/* 法定程序：期限是這一段的主角，所以做成有編號的步驟 */
-.law-steps { list-style: none; counter-reset: s; padding-left: 0; }
+/* 法定期限是全頁最該被記住的東西，所以做成有編號的步驟。
+ * ⛔ 這是全站唯一的圓形編號——章節編號用橫條，兩者不可混用，
+ *    混用之後「圓形＝法定期限」這個記號就沒有辨識度了。 */
+.law-steps { list-style: none; counter-reset: s; padding-left: 0; margin: var(--sp-4) 0 0; }
 .law-steps > li {
   counter-increment: s;
   position: relative;
   padding-left: 46px;
-  margin-top: 1.3em;
+  margin-top: var(--sp-4);
 }
 .law-steps > li::before {
   content: counter(s);
@@ -1068,87 +1484,190 @@ body.shell-layout .shell-main > .site-mark:has(+ .page-body),
   display: grid; place-items: center;
   border-radius: var(--radius-pill);
   background: var(--warm);
-  color: #fff;
+  color: #fff;                          /* 5.32:1 */
   font-size: 0.95em;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .law-steps .step-t { display: block; font-weight: 700; padding-top: 5px; }
 .law-steps p { margin: 4px 0 0; font-size: 0.97em; }
 
-.law-note {
-  margin: 1.2em 0;
-  padding: 12px 14px;
-  background: var(--warm-wash);
-  border-radius: var(--radius-sm);
-  font-size: 0.95em;
-  line-height: 1.8;
-}
-
-.law-table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 0.95em; }
-.law-table caption { text-align: left; color: var(--ink-soft); font-size: 0.88em; padding-bottom: 8px; }
+.law-table { width: 100%; border-collapse: collapse; margin: var(--sp-4) 0; font-size: 0.95em; }
+.law-table caption { text-align: left; color: var(--ink-soft); font-size: 0.88em; padding-bottom: var(--sp-1); }
 .law-table th, .law-table td { border-bottom: 1px solid var(--line); padding: 10px 6px; text-align: left; vertical-align: top; }
 .law-table thead th { border-bottom: 2px solid var(--ink); font-weight: 700; }
 .law-table td:first-child { width: 38%; }
 
-/* 求助管道：號碼是要被記住的東西，給它固定寬度與等寬數字 */
-.law-contacts { list-style: none; padding: 0; margin: 1.2em 0; }
+/* ---- 「可以找誰」＝頁尾出血區塊 ----
+ * 從內文流裡抽出來變成一整塊，因為這一段是所有人最需要、也最常沒讀到的。
+ * 號碼在不點開任何東西之前就看得到。 */
+.law-help-bleed {
+  margin: var(--sp-6) calc(var(--gap) * -1) 0;
+  padding: var(--sp-5) var(--gap);
+  background: var(--calm-wash);
+}
+.law-help-bleed .page-sec-h::before { color: var(--calm-text); }  /* --calm-wash 上 5.17:1 */
+.law-contacts { list-style: none; padding: 0; margin: var(--sp-4) 0 0; }
 .law-contacts li {
   display: flex; gap: 14px; align-items: baseline;
-  padding: 12px 0;
+  padding: var(--sp-2) 0;
   border-bottom: 1px solid var(--line);
 }
+/* ⛔ 號碼不可用 --warm-text：它在 --calm-wash 上只有 4.51:1，貼線。
+ *    用 --ink（6.16:1），並靠字級與字重讓它顯眼，不靠顏色。 */
 .law-contacts .c-num {
   flex: 0 0 4.2em;
+  font-size: 1.5em;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--warm-text);
+  letter-spacing: -0.01em;
+  color: var(--ink);                    /* --calm-wash 上 6.16:1 */
 }
 .law-contacts .c-body { flex: 1 1 auto; line-height: 1.75; }
-.law-sources { border-top: 1px solid var(--line); margin-top: 3em; }
+.law-contacts .c-body strong { color: var(--calm-text); }   /* --calm-wash 上 5.17:1 */
+.law-help-bleed .law-note { border-left-color: var(--ink-soft); }
 
-/* ---- 案例頁 ---- */
+/* 條文出處壓成頁尾兩行——它是給要查證的人用的，不是給第一次讀的人用的 */
+.law-sources {
+  border-top: 1px solid var(--line);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
+  font-size: 0.88em;
+}
+.law-sources h2 {
+  font-size: var(--fs-4);
+  margin-top: 0;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+.law-sources .law-list li { margin-top: 4px; line-height: 1.7; }
+
+/* ---- 案例頁 ----
+ * ⛔ 拿掉白卡（--card ＋ 1px 邊 ＋ 12px 圓角）。四張等大白卡疊起來讀成 FAQ 列表，
+ *    而且卡片邊框在 640px 欄裡會把每一件事框成「一則貼文」。
+ *    改成無框長版，靠留白與色條分節。 */
 .case {
-  margin-top: 2.4em;
-  padding: 18px 20px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  position: relative;
+  margin-top: var(--sp-6);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
 }
-.case h2 { margin-top: 0.2em; border-top: 0; padding-top: 0; }
+/* 案件之間＝一條 64px 短線靠左，不是整寬橫線。整寬橫線會把長版切回四塊磚。 */
+.case + .case::before {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 1px;
+  background: var(--line-strong);
+  margin-bottom: var(--sp-6);
+}
+.case h2 { margin-top: 0; border-top: 0; padding-top: 0; max-width: none; }
+
+/* 插圖與標籤一起浮到右邊，讓文字咬合上來，不再用 position:absolute ＋
+ * max-width: calc(100% - 82px) 那組閃避 */
+.case-mark-wrap {
+  float: right;
+  width: 96px;
+  margin: 0 0 var(--sp-2) var(--sp-4);
+  text-align: center;
+}
+.case-mark { position: static; width: 72px; height: 72px; top: auto; right: auto; }
+/* ⛔ 標籤不做 pill：pill 與牆上五顆鼓勵鈕撞語彙，
+ *    讀者會以為那是可以按的東西。改成插圖下的一行小字。 */
 .case-tag {
-  display: inline-block;
-  margin: 0;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--warm-wash);
-  color: var(--warm-text);
-  font-size: 0.8em;
+  display: block;
+  margin: 4px 0 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: var(--fs-5);
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  color: var(--ink-soft);               /* 紙上 4.98:1 */
+  max-width: none;
 }
-.case-dl { margin: 1em 0 0; }
+
+/* 雙欄定義列表：左欄是標籤，右欄才是主體。
+ * 原本 16 個橘色大字距 dt 各佔一整行，在 640px 欄裡不斷閃；
+ * 改成左欄之後眼睛沿著一條隱形的線走。 */
+.case-dl {
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  column-gap: var(--sp-3);
+  row-gap: 0;
+  margin: var(--sp-4) 0 0;
+}
 .case-dl dt {
-  margin-top: 1.15em;
+  grid-column: 1;
+  margin-top: var(--sp-3);
+  text-align: right;
   font-size: 0.86em;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--warm-text);
+  line-height: 2.15;                    /* 對齊 dd 首行基線（dd 17px x 1.85） */
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);               /* 紙上 4.98:1 */
 }
-.case-dl dd { margin: 4px 0 0; line-height: 1.85; }
-/* 「法律上怎麼看」是每個案件的收束，給它一條邊 */
-.case-dl dt:last-of-type { color: var(--calm-text); }
-.case-dl dd:last-of-type {
-  margin-top: 6px;
-  padding-left: 12px;
-  border-left: 3px solid var(--calm);
-}
-.case-cta {
-  margin-top: 2.4em;
-  padding: 14px 16px;
-  background: var(--warm-wash);
-  border-radius: var(--radius);
+.case-dl dd {
+  grid-column: 2;
+  margin: var(--sp-3) 0 0;
   line-height: 1.85;
 }
+/* 「如果換一個做法」是每一件事的收束，給它一條邊。
+ * ⛔ 這條邊不可用 --case-ink：分頁主色只准出現在三個位置，這裡不是其中之一。 */
+.case-dl dd:last-of-type {
+  padding-left: var(--sp-2);
+  border-left: 3px solid var(--ink-soft);   /* 紙上 4.98:1，非文字 >= 3 */
+}
+.case-cta {
+  clear: both;
+  margin-top: var(--sp-6);
+  padding: 2px 0 2px var(--sp-3);
+  border-left: 5px solid var(--warm);
+  background: transparent;
+  border-radius: 0;
+  line-height: 1.85;
+}
+
+/* ---- 我說過的話 ---- */
+.mine-sec { margin-top: var(--sp-6); }
+.mine-sec > * + * { margin-top: var(--sp-3); }
+/* 這一頁對新訪客 100% 是空的，所以空狀態就是主畫面：
+ * 96px 插圖 ＋ 一行字 ＋ 一顆實色鈕，置中出血。 */
+.mine-empty {
+  margin: var(--sp-4) calc(var(--gap) * -1) 0;
+  padding: var(--sp-6) var(--gap);
+  text-align: center;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+/* ⛔ 描邊不可用 --line-strong：它對紙只有 1.58:1，遠不到非文字 3:1。
+ *    這是全頁最大的圖形，不能只有隱約的一圈。 */
+.mine-empty-mark { display: block; width: 96px; height: 96px; margin: 0 auto; }
+.mine-empty-t {
+  margin: var(--sp-3) 0 0;
+  font-size: 0.95em;
+  line-height: 1.7;
+  color: var(--ink-soft);               /* --card 上 5.23:1 */
+}
+.mine-empty-a { margin: var(--sp-4) 0 0; }
+.mine-empty-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  background: var(--warm);
+  color: #fff;                          /* 5.32:1 */
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.14s ease;
+}
+.mine-empty-btn:hover { box-shadow: var(--shadow-2); }
 
 /* ---- 分頁插圖（內嵌 SVG）----
  * ⛔ 一律內嵌 SVG，不要用 <img src>。CSP 是 default-src 'self'，
@@ -1158,23 +1677,35 @@ body.shell-layout .shell-main > .site-mark:has(+ .page-body),
   display: block;
   width: 100%;
   height: auto;
-  margin: 0 0 1.6em;
+  margin: 0 0 var(--sp-4);
 }
 
-.case { position: relative; }
-.case-mark {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  width: 64px;
-  height: 64px;
+.page-footnote {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--line);
 }
-/* 插圖不能壓到標題。案例標題與標籤讓出右側空間。 */
-.case-tag, .case h2 { max-width: calc(100% - 82px); }
 
 @media (max-width: 560px) {
-  .case-mark { width: 48px; height: 48px; top: 12px; right: 12px; }
-  .case-tag, .case h2 { max-width: calc(100% - 62px); }
+  /* 插圖改成標題上方靠左的一橫排，不再浮動——96px 的浮動區塊在 320px 欄裡
+   * 只留 200px 給文字，每一行都在折。 */
+  .case-mark-wrap {
+    float: none;
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin: 0 0 var(--sp-1);
+    text-align: left;
+  }
+  .case-mark { width: 56px; height: 56px; }
+  .case-tag { margin: 0; }
+  /* 雙欄在窄螢幕落回單欄：7.5em 的左欄會把右欄壓到 12 個中文字寬 */
+  .case-dl { display: block; }
+  .case-dl dt { text-align: left; line-height: 1.6; margin-top: var(--sp-3); }
+  .case-dl dd { margin-top: 4px; }
+  .page-head h1 { font-size: 1.7rem; }
+  .page-head { padding-top: var(--sp-3); }
 }
 
 /* ---- 用「加寬」換「變矮」，進而換到更多軌道（2026-08-21）----
@@ -1314,3 +1845,162 @@ body.shell-layout .shell-main > .site-mark:has(+ .page-body),
 
 /* 送出提示裡的連結：底色是深松青，連結色要跟著換 */
 .notice-link { color: #fff; text-decoration: underline; font-weight: 600; }
+
+/* ================= 14. 全站視覺統一（2026-08-25）=================
+ * 這一章把首頁與分頁收進同一套語彙。⛔ 只動樣式，不動機制：
+ * 軌道計算、LANE_H、飄移、回收、applyStageHeight、內部捲動、?motion=force
+ * 都在 wall.js，本章一行都不碰；.msg-card 也沒有加任何會觸發 layout 的轉場。
+ *
+ * 四條全站規則：
+ *   字重  只有 400 與 700（例外具名在下方 .msg-reaction）
+ *   留白  只有 --sp-1..6（8/12/16/24/32/64）
+ *   圓角  --radius(12) 用於大面積容器、--radius-sm(7) 用於控制項、pill 只給 chip
+ *   線條  左緣豎線＝狀態／橫條＝分節／1px --line＝分隔，超出即為違規
+ */
+
+/* 字重：合成假粗體在 Microsoft JhengHei／PingFang TC 上會糊，
+ * 因為這兩套沒有 500/600 的實體字重。全站因此只用 400 與 700。 */
+button { font-weight: 700; }
+.wall-toolbar button { font-weight: 700; }
+.triage-item .t-label { font-weight: 700; }
+.site-mark .tagline { font-weight: 400; }
+/* ⛔ 具名例外：五顆鼓勵鈕維持 600。
+ *    它們在桌機是 nowrap 排成一行、卡片寬 580px，加粗會把第五顆推出卡片外，
+ *    而「五種回應全部看得見」是 G18 的主軸。字重讓位給可見性。 */
+.msg-reaction { font-weight: 600; }
+
+/* ---- 首屏：站名讓位給規模 ----
+ * ⛔ 全部用 .site-mark:not(.page-head) 收斂。分頁的 header 同時掛著 site-mark
+ *    與 page-head（site-mark 是 build-onefile.js 抓頁首用的鉤子，不能拿掉），
+ *    而本章寫在檔案最後面——不收斂的話這裡的 h1 1.15rem 會蓋掉分頁的 2rem，
+ *    分頁標題會一起縮水。
+ * 站名已經由常駐面板承擔一次，首屏再放一個同樣大的標題只是重複。
+ * 首頁真正的主角是「有多少句話沒說出口」，所以識別行壓小，數字放大。 */
+.site-mark:not(.page-head) {
+  padding: var(--sp-2) 0 var(--sp-1);
+  gap: 2px var(--sp-2);
+  margin-bottom: var(--sp-1);
+}
+.site-mark:not(.page-head) h1 {
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  gap: 9px;
+}
+.site-mark:not(.page-head) h1::before { width: 5px; height: 1.05em; }
+/* ⛔ 標語從 --warm-text 改回 --ink-soft（紙上 4.98:1）。
+ *    橘色在這個站是有意義的：金＝還沒有人回應、金＝主要動作。
+ *    標語不是狀態也不是動作，佔用橘色只會稀釋那條規則。 */
+.site-mark:not(.page-head) .tagline { font-size: 0.95em; color: var(--ink-soft); }
+.wall-scale { margin: var(--sp-1) 0; font-size: 0.95em; }
+.wall-scale strong { font-size: 1.75em; }
+.site-mark:not(.page-head) .alias-line { color: var(--ink-soft); }
+
+/* ---- 身分分流：三張卡的視覺份量刻意不相等 ----
+ * 「我被霸凌」是這個站存在的理由，所以它是唯一的實色卡。
+ * 另外兩條走「1px 邊 ＋ 4px 左緣色條」的次級樣式，與留言卡同一個語彙。 */
+.triage { gap: var(--sp-1); margin: 0 0 var(--sp-1); }
+.triage-item {
+  padding: 10px var(--sp-2);
+  border-left-width: 4px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  /* ⛔ 位移只用 transform，且已被全域 reduced-motion 區塊降到 0.01ms */
+  transition: box-shadow 0.14s ease, background-color 0.14s ease,
+              border-color 0.14s ease, transform 0.14s ease;
+}
+.triage-item:hover { transform: translateY(-1px); }
+.triage-item .t-label { letter-spacing: 0.05em; }
+.triage-item .t-note { margin-top: 2px; }
+
+/* ---- 工具列：安靜的分段控制 ---- */
+.wall-toolbar { gap: var(--sp-1); margin-bottom: var(--sp-1); padding: var(--sp-1) 0; }
+.wall-toolbar button { letter-spacing: 0.06em; }
+
+/* ---- 牆面：日光下的暖牆 ----
+ * ⛔ 不要再做成暗牆（2026-08-20 試過，Lee 否決）。
+ * 磚縫壓得更淡、底部暖光收窄：磚縫太明顯時，整面牆會跟卡片的邊搶注意力。
+ * 只改塗色，不改任何尺寸——舞台高度與軌道數仍由 wall.js 決定。 */
+:root {
+  --stage-seam: rgba(87, 82, 121, 0.042);
+  --stage-glow: rgba(234, 157, 52, 0.16);
+}
+.wall-frame { border-radius: var(--radius); }
+
+/* ---- 留言卡＝牆上被照亮的一張紙 ----
+ * ⛔ 不得加會觸發 layout 的 transition／animation（transform／margin／width／height）。
+ *    彈幕靠 translate3d 移動，200 則要維持 FPS >= 30。這裡只動 box-shadow 與 border-color。
+ * 左緣豎線加寬到 4px，與分流卡、引用、狀態統一成同一種豎線語彙。
+ * ⚠️ 只改 border-left 的「寬度」不改高度，所以 measureLaneHeight() 量到的
+ *    卡片高度不變，軌距與軌道數不受影響。 */
+.msg-card {
+  border-left-width: 4px;
+  border-radius: 2px var(--radius-sm) var(--radius-sm) 2px;
+  transition: box-shadow 0.15s ease, border-color 0.2s ease;
+}
+.msg-who { color: var(--ink-soft); }
+
+/* ---- 底部常駐輸入列 ---- */
+.composer-bar { padding: var(--sp-1) 0 10px; }
+.composer-row { gap: var(--sp-1); }
+.composer-row textarea { border-radius: var(--radius-sm); }
+.composer-row button { padding: 9px var(--sp-4); letter-spacing: 0.06em; }
+
+/* ---- 求助對話框 ---- */
+.help-dialog { border-left-width: 5px; }
+.help-dialog h2 { letter-spacing: 0.06em; font-weight: 700; }
+
+/* ---- 「我說過的話」的每一則 ----
+ * 狀態＝左緣豎線的顏色，與首頁留言卡同一條規則：
+ *   金   ＝ 還在檢視中，牆上還看不到
+ *   松青 ＝ 已經在牆上了
+ * 同一個人因此在兩個地方學到同一條規則，不必學第二次。
+ * ⛔ 不要改回虛線邊框：虛線讀起來像「壞掉」或「暫存」，不像「正在被看」。 */
+.share-list { gap: var(--sp-1); margin: var(--sp-3) 0 0; padding: 0; }
+.share-item {
+  display: block;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--rule-answered);   /* 卡上 5.88:1，非文字 >= 3 */
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--sp-2) var(--sp-3);
+}
+.share-item.is-pending {
+  border-style: solid;
+  border-left-color: var(--rule-waiting);        /* 卡上 5.12:1 */
+}
+.share-item p { margin: 0; line-height: 1.75; }
+.share-state {
+  margin: 6px 0 0;
+  font-size: 0.84em;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--calm-text);                       /* 卡上 5.88:1 */
+}
+.share-item.is-pending .share-state { color: var(--warm-text); }   /* 卡上 5.12:1 */
+
+/* ---- 焦點環：非文字對比 >= 3:1（WCAG 1.4.11）----
+ * --ring 對紙 5.59、對舞台 5.09，兩處都過。offset 留 2px 讓環不咬住字。 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ⛔ hidden 屬性必須永遠贏。本章給 .mine-empty、.share-item、.page-head 等
+ *    都指定了自訂 display，全域那條 [hidden]{display:none!important} 因此
+ *    比以往更重要——它帶 !important，所以位置在前也照樣勝出。
+ *    ⛔ 不要移除，也不要在任何地方用 !important 覆蓋 display。 */
+
+/* ---- reduced-motion ----
+ * 本章新增的容器（.page-toc／.mine-empty／.law-help-bleed／.case-mark-wrap／
+ * .shell-panel）都沒有固定高度，也沒有 overflow:hidden，
+ * 因此不會像 .wall-frame 那樣把靜態退路的內容裁掉。
+ * ⛔ 面板是唯一有 overflow 的新容器（overflow-y:auto，只在面板自己身上），
+ *    它不包住任何頁面內容，靜態退路不受影響。
+ * 本章新增的轉場只有 box-shadow／background-color／transform，
+ * 全部落在上面第 13 章的全域降速規則裡。 */
+@media (prefers-reduced-motion: reduce) {
+  .triage-item:hover { transform: none; }
+}

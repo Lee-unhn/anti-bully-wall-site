@@ -64,13 +64,23 @@
      * phase: 'always' = 兩個時期都出現；'reveal' = 只在 reveal 期出現。
      * kind:  'page'   = 換頁；'inline' = 不換頁，觸發同頁行為。
      */
+    /* short: 手機底部四格 tab 用的短標籤（一到三個字）。⛔ 不可留空——
+     *   底部 tab 每格只有約 94px（375px 螢幕 ÷ 4），完整 label 放不下，
+     *   放不下就會折行、把 tab bar 撐高，把牆的軌道吃掉一條。
+     * note: 桌機面板目錄項的說明行。有了說明行，那一列讀起來就不是按鈕，是目錄。
+     *   ⛔ 不要寫進數量（例「60 則」）——種子換掉之後那個數字會變成謊話。 */
     nav: [
-      { id: 'speak',  label: '說出你的事',   kind: 'inline', target: 'compose',     phase: 'always' },
-      { id: 'wall',   label: '這面牆',       kind: 'page',   target: 'index.html',  phase: 'always' },
-      { id: 'cases',  label: '霸凌是什麼樣子', kind: 'page', target: 'cases.html',  phase: 'always' },
-      { id: 'law',    label: '你該知道的三件事', kind: 'page', target: 'law.html',  phase: 'always' },
-      /* ⛔ 預留接口，teaser 期不渲染。label 待 reveal 時改成節目名。 */
-      { id: 'show',   label: '關於這個計畫',  kind: 'page',   target: 'show.html',  phase: 'reveal' }
+      { id: 'speak',  label: '說出你的事',   short: '說出來', note: '匿名，沒有人知道是誰',
+        kind: 'inline', target: 'compose',     phase: 'always' },
+      { id: 'wall',   label: '這面牆',       short: '牆',     note: '大家說出口的話',
+        kind: 'page',   target: 'index.html',  phase: 'always' },
+      { id: 'cases',  label: '霸凌是什麼樣子', short: '案例',  note: '四件事，實際發生的樣子',
+        kind: 'page',   target: 'cases.html',  phase: 'always' },
+      { id: 'law',    label: '你該知道的三件事', short: '法規', note: '條文原文與法定期限',
+        kind: 'page',   target: 'law.html',    phase: 'always' },
+      /* ⛔ 預留接口，teaser 期不渲染。label 待公開時改。 */
+      { id: 'show',   label: '關於這個計畫',  short: '計畫',   note: '這個站為什麼存在',
+        kind: 'page',   target: 'show.html',   phase: 'reveal' }
     ],
 
     /* 求助資源不是 nav 項目，它在每一頁常駐浮動，任何時候都伸手可及。 */

@@ -9,29 +9,54 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=6e8c2809">
+<link rel="stylesheet" href="styles.css?v=eb7d74e4">
 </head>
 <body class="shell-layout">
 
 
 <div class="shell-main">
-  <header class="site-mark">
-    <p class="hint"><a href="index.html">← 回到這面牆</a></p>
+  <header class="site-mark page-head page-head--mine">
+    <p class="page-back"><a href="index.html">← 回到這面牆</a></p>
     <h1>我說過的話</h1>
+    <p class="page-sub">只有你看得到。這一頁不會離開這台裝置。</p>
   </header>
 
-  <main class="page-body">
-    <p class="lede">你在這台裝置上說過的話會留在這裡。這一頁只給你自己看，
-      是為了讓你知道那些話還在、走到哪一步了。</p>
-    <p class="hint">留言送出後會先經過人工檢視，通過才會出現在牆上。檢視期間它也會列在這裡，
-      你不會找不到自己剛剛說的話。</p>
-    <p class="law-note">這個網站還在準備階段，<strong>目前沒有人在審核</strong>，
-      所以你的留言會一直停在「檢視中」，也還不會出現在牆上。
-      它沒有消失——就在下面，只存在你這台裝置裡。</p>
-    <p class="hint">這裡沒有分享或下載——說出來這件事的重量不該變成一張可以轉發的圖。
-      這面牆會替你留著。</p>
-    <ul class="share-list" data-share-list></ul>
-    <p class="hint" data-share-empty>你還沒有在這台裝置上說過話。<a href="index.html#compose">現在說一句</a>也可以。</p>
+  <main class="page-body page-body--mine">
+    <p class="lede">你在這台裝置上說過的話會留在這裡，讓你知道那些話還在、走到哪一步了。</p>
+
+    <nav class="page-toc" aria-label="本頁章節">
+      <p class="page-toc-h">這一頁有兩段</p>
+      <ol>
+        <li><a href="#m-list"><span>你說過的話</span></a></li>
+        <li><a href="#m-how"><span>這一頁是怎麼運作的</span></a></li>
+      </ol>
+    </nav>
+
+    <section class="mine-sec" aria-labelledby="m-list">
+      <h2 id="m-list" class="page-sec-h">你說過的話</h2>
+      <ul class="share-list" data-share-list></ul>
+      <!-- 這一頁對新訪客 100% 是空的，所以空狀態就是這一頁的主畫面，
+           不是一行灰字的註腳。 -->
+      <div class="mine-empty" data-share-empty>
+        <svg class="mine-empty-mark" viewBox="0 0 96 96" role="img" aria-labelledby="me-t">
+          <title id="me-t">一個還沒有寫上字的空對話框</title>
+          <path d="M12 20h72v46H40L24 80V66H12z" fill="none" stroke="var(--ink-soft)"
+                stroke-width="2" stroke-linejoin="round"/>
+          <path d="M30 38h36M30 50h22" fill="none" stroke="var(--ink-soft)"
+                stroke-width="2" stroke-linecap="round" stroke-dasharray="2 8"/>
+        </svg>
+        <p class="mine-empty-t">你還沒有在這台裝置上說過話。</p>
+        <p class="mine-empty-a"><a class="mine-empty-btn" href="index.html#compose">說出你的事</a></p>
+      </div>
+    </section>
+
+    <section class="mine-sec" aria-labelledby="m-how">
+      <h2 id="m-how" class="page-sec-h">這一頁是怎麼運作的</h2>
+      <p class="law-note">留言送出後會先經過人工檢視，通過才會出現在牆上；檢視期間它一樣列在上面，
+        你不會找不到自己剛剛說的話。這個網站還在準備階段，<strong>目前沒有人在審核</strong>，
+        所以你的留言會一直停在「檢視中」。它沒有消失，就在這台裝置裡。</p>
+      <p>這裡沒有分享或下載——說出來這件事的重量不該變成一張可以轉發的圖。這面牆會替你留著。</p>
+    </section>
   </main>
 
 </div>
@@ -50,14 +75,14 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=6e8c2809"></script>
-<script src="js/schema.js?v=6e8c2809"></script>
-<script src="js/keywords.js?v=6e8c2809"></script>
-<script src="js/data-provider.js?v=6e8c2809"></script>
-<script src="js/guard.js?v=6e8c2809"></script>
-<script src="js/shell.js?v=6e8c2809"></script>
-<script src="js/wall.js?v=6e8c2809"></script>
-<script src="js/share.js?v=6e8c2809"></script>
-<script src="js/app.js?v=6e8c2809"></script>
+<script src="content.js?v=eb7d74e4"></script>
+<script src="js/schema.js?v=eb7d74e4"></script>
+<script src="js/keywords.js?v=eb7d74e4"></script>
+<script src="js/data-provider.js?v=eb7d74e4"></script>
+<script src="js/guard.js?v=eb7d74e4"></script>
+<script src="js/shell.js?v=eb7d74e4"></script>
+<script src="js/wall.js?v=eb7d74e4"></script>
+<script src="js/share.js?v=eb7d74e4"></script>
+<script src="js/app.js?v=eb7d74e4"></script>
 </body>
 </html>

@@ -9,30 +9,43 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=6e8c2809">
+<link rel="stylesheet" href="styles.css?v=eb7d74e4">
 </head>
 <body class="shell-layout">
 
 
 <div class="shell-main">
-  <header class="site-mark">
-    <p class="hint"><a href="index.html">← 回到這面牆</a></p>
+  <header class="site-mark page-head page-head--cases">
+    <p class="page-back"><a href="index.html">← 回到這面牆</a></p>
     <h1>霸凌是什麼樣子</h1>
+    <p class="page-sub">四件事，一件一件寫下來：發生了什麼、誰在場、後來怎麼了。</p>
   </header>
 
-  <main class="page-body">
+  <main class="page-body page-body--cases">
     <p class="lede">霸凌很少是一場戲劇性的衝突，多半是一連串「好像沒什麼」的小事疊起來的。
       這裡用一件一件的方式寫下來：發生了什麼、當下有誰在場、事後怎麼處理、如果換一個做法會怎樣，
       以及法律上怎麼看。</p>
 
+    <nav class="page-toc" aria-label="本頁章節">
+      <p class="page-toc-h">這一頁有四件</p>
+      <ol>
+        <li><a href="#c1"><span>那個沒有他的群組</span></a></li>
+        <li><a href="#c2"><span>一張截圖，兩百個讚</span></a></li>
+        <li><a href="#c3"><span>每天剛好帶足的零錢</span></a></li>
+        <li><a href="#c4"><span>老師拿他當例子</span></a></li>
+      </ol>
+    </nav>
+
     <article class="case" aria-labelledby="c1">
-      <svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m1t"><title id="m1t">一群相連的圓點，一個在圈外沒有連線</title>
+      <div class="case-mark-wrap">
+<svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m1t"><title id="m1t">一群相連的圓點，一個在圈外沒有連線</title>
 <circle cx="30" cy="22" r="7" fill="var(--warm-tint)"/><circle cx="46" cy="32" r="7" fill="var(--warm-tint)"/>
 <circle cx="26" cy="40" r="7" fill="var(--warm-tint)"/><circle cx="42" cy="50" r="7" fill="var(--warm-tint)"/>
 <path d="M30 22 46 32 42 50 26 40Z" fill="none" stroke="var(--warm)" stroke-width="2" stroke-linejoin="round"/>
 <circle cx="62" cy="62" r="7" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="3 3"/></svg>
-      <p class="case-tag">關係霸凌</p>
-      <h2 id="c1">案件一：那個沒有他的群組</h2>
+        <p class="case-tag">關係霸凌</p>
+      </div>
+      <h2 id="c1" class="page-sec-h">那個沒有他的群組</h2>
       <dl class="case-dl">
         <dt>發生了什麼</dt>
         <dd>班上原本的群組多了一個新的，成員是全班減一。分組報告在新群組裡分完，他到當天早上才知道自己沒有組。之後兩個月，午餐、掃地、校外教學的分工都是這樣決定的。沒有人罵他，也沒有人動他。</dd>
@@ -46,15 +59,17 @@
     </article>
 
     <article class="case" aria-labelledby="c2">
-      <svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m2t"><title id="m2t">一張卡片複製擴散成許多小卡</title>
+      <div class="case-mark-wrap">
+<svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m2t"><title id="m2t">一張卡片複製擴散成許多小卡</title>
 <rect x="6" y="14" width="30" height="22" rx="3" fill="var(--card)" stroke="var(--warm)" stroke-width="2"/>
 <line x1="12" y1="22" x2="30" y2="22" stroke="var(--warm)" stroke-width="2"/><line x1="12" y1="28" x2="24" y2="28" stroke="var(--warm-tint)" stroke-width="2"/>
 <rect x="42" y="10" width="16" height="11" rx="2" fill="var(--warm-tint)" opacity=".85"/>
 <rect x="46" y="27" width="16" height="11" rx="2" fill="var(--warm-tint)" opacity=".6"/>
 <rect x="38" y="42" width="16" height="11" rx="2" fill="var(--warm-tint)" opacity=".4"/>
 <rect x="56" y="46" width="12" height="9" rx="2" fill="var(--warm-tint)" opacity=".25"/></svg>
-      <p class="case-tag">網路霸凌</p>
-      <h2 id="c2">案件二：一張截圖，兩百個讚</h2>
+        <p class="case-tag">網路霸凌</p>
+      </div>
+      <h2 id="c2" class="page-sec-h">一張截圖，兩百個讚</h2>
       <dl class="case-dl">
         <dt>發生了什麼</dt>
         <dd>他的照片被做成梗圖，配上一句嘲笑他家庭狀況的字，貼在公開帳號上。兩天內兩百多個讚，留言裡有人接著編下一個版本。他認識裡面大部分的人。</dd>
@@ -68,12 +83,14 @@
     </article>
 
     <article class="case" aria-labelledby="c3">
-      <svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m3t"><title id="m3t">樓梯間，一個人被三個人擋住</title>
+      <div class="case-mark-wrap">
+<svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m3t"><title id="m3t">樓梯間，一個人被三個人擋住</title>
 <path d="M4 62h16V48h16V34h16V20h16" fill="none" stroke="var(--ink-soft)" stroke-width="2.5" stroke-linejoin="round"/>
 <circle cx="24" cy="40" r="6" fill="none" stroke="var(--calm-ink)" stroke-width="2"/>
 <circle cx="44" cy="26" r="5" fill="var(--warm)"/><circle cx="56" cy="26" r="5" fill="var(--warm)" opacity=".7"/><circle cx="50" cy="15" r="5" fill="var(--warm)" opacity=".45"/></svg>
-      <p class="case-tag">肢體與財物</p>
-      <h2 id="c3">案件三：每天剛好帶足的零錢</h2>
+        <p class="case-tag">肢體與財物</p>
+      </div>
+      <h2 id="c3" class="page-sec-h">每天剛好帶足的零錢</h2>
       <dl class="case-dl">
         <dt>發生了什麼</dt>
         <dd>三個學長在放學後的樓梯間跟他「借」錢，一次五十到一百。不給就推、擋著不讓走。他後來每天只帶剛好的錢，這樣被拿走的時候比較不痛。持續大半個學期。</dd>
@@ -87,7 +104,8 @@
     </article>
 
     <article class="case" aria-labelledby="c4">
-      <svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m4t"><title id="m4t">講台高於一排座位，其中一個被指出來</title>
+      <div class="case-mark-wrap">
+<svg class="case-mark" viewBox="0 0 72 72" role="img" aria-labelledby="m4t"><title id="m4t">講台高於一排座位，其中一個被指出來</title>
 <rect x="8" y="12" width="26" height="18" rx="3" fill="var(--warm)"/>
 <line x1="38" y1="21" x2="60" y2="21" stroke="var(--warm)" stroke-width="2.5" stroke-dasharray="4 3"/>
 <circle cx="64" cy="21" r="4" fill="var(--warm)"/>
@@ -95,8 +113,9 @@
 <rect x="26" y="48" width="12" height="12" rx="2" fill="var(--ink-soft)" opacity=".35"/>
 <rect x="44" y="48" width="12" height="12" rx="2" fill="none" stroke="var(--calm-ink)" stroke-width="2.5"/>
 <rect x="62" y="48" width="8" height="12" rx="2" fill="var(--ink-soft)" opacity=".35"/></svg>
-      <p class="case-tag">師對生</p>
-      <h2 id="c4">案件四：老師拿他當例子</h2>
+        <p class="case-tag">師對生</p>
+      </div>
+      <h2 id="c4" class="page-sec-h">老師拿他當例子</h2>
       <dl class="case-dl">
         <dt>發生了什麼</dt>
         <dd>每次考完，老師都會在全班面前念他的分數，加一句「這樣以後要做什麼」。一整個學年，每次段考。他開始在考前一週睡不著。</dd>
@@ -130,14 +149,14 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=6e8c2809"></script>
-<script src="js/schema.js?v=6e8c2809"></script>
-<script src="js/keywords.js?v=6e8c2809"></script>
-<script src="js/data-provider.js?v=6e8c2809"></script>
-<script src="js/guard.js?v=6e8c2809"></script>
-<script src="js/shell.js?v=6e8c2809"></script>
-<script src="js/wall.js?v=6e8c2809"></script>
-<script src="js/share.js?v=6e8c2809"></script>
-<script src="js/app.js?v=6e8c2809"></script>
+<script src="content.js?v=eb7d74e4"></script>
+<script src="js/schema.js?v=eb7d74e4"></script>
+<script src="js/keywords.js?v=eb7d74e4"></script>
+<script src="js/data-provider.js?v=eb7d74e4"></script>
+<script src="js/guard.js?v=eb7d74e4"></script>
+<script src="js/shell.js?v=eb7d74e4"></script>
+<script src="js/wall.js?v=eb7d74e4"></script>
+<script src="js/share.js?v=eb7d74e4"></script>
+<script src="js/app.js?v=eb7d74e4"></script>
 </body>
 </html>
