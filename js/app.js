@@ -105,8 +105,8 @@
       article.appendChild(a);
       host.appendChild(article);
     });
-    var badge = $('[data-c="law.draftBadge"]');
-    if (badge) badge.hidden = law.signedOff === true;
+    /* 草稿標記已於 2026-08-31 移除（見 law.html 的註解）。
+     * 解釋放回網站時，擋在前面的是 G9 上線閘門，不是頁面上的一行字。 */
   }
 
   function renderHelp() {

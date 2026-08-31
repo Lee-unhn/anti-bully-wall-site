@@ -42,6 +42,10 @@
       alias:     fields.alias,             /* { name, hue } 本機生成，不可識別 */
       status:    fields.status || STATUS.PENDING,
       flags:     fields.flags  || [],
+      /* hold：自動審核判定要留給人看的理由代碼（triage.js）。
+       * 空陣列＝機器直接放行。後台靠這個知道為什麼會落到佇列裡——
+       * 沒有它的話人只看得到一則留言，不知道機器在擔心什麼。 */
+      hold:      fields.hold   || [],
       source:    fields.source || SOURCE.VISITOR,
       attribution: fields.attribution || '', /* source 非 visitor 時必填 */
       reactions: fields.reactions || emptyReactions(),

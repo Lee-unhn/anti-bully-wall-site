@@ -186,8 +186,13 @@
           id: newId(),
           body: draft.body,
           alias: draft.alias,
-          status: S.STATUS.PENDING,
+          /* ⛔ 這裡曾經寫死 PENDING。2026-08-31 改為自動審核（triage.js）決定：
+           * 判得準的直接 approved，判不準的才留 pending。寫死的話整面牆在
+           * 沒有人值班時是死的——說完話只看得到「檢視中」，然後永遠停在那裡。
+           * 前端這一關是體驗；真後端必須自己重跑 triage，不能信任這個欄位。 */
+          status: draft.status || S.STATUS.PENDING,
           flags: draft.flags || [],
+          hold: draft.hold || [],
           source: draft.source || S.SOURCE.VISITOR,
           attribution: draft.attribution || '',
           createdAt: nowIso()

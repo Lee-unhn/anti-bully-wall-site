@@ -576,13 +576,18 @@
       btn.disabled = true;
 
       var scan = null;
+      var decision = null;
+      var kw = null;
       ABW.provider.getKeywords()
-        .then(function (kw) {
+        .then(function (k) {
+          kw = k;
           scan = ABW.guard.scan(body, kw);
           if (scan.blocked) {
             /* 守門不得阻擋送出。真的走到這裡代表 guard 被改壞了。 */
             throw new Error('[ABW] guard 回傳 blocked=true，違反產品裁定');
           }
+          /* 自動審核：判得準的直接上牆，判不準的留給人看（裁定 2026-08-31）。 */
+          decision = ABW.triage.decide(scan, kw);
           return ABW.provider.getAlias();
         })
         .then(function (alias) {
@@ -590,20 +595,38 @@
           return ABW.provider.createMessage({
             body: scan.body,
             alias: alias,
-            flags: scan.flags
+            flags: scan.flags,
+            status: decision.status,
+            hold: decision.reasons.map(function (r) { return r.code; })
           });
         })
         .then(function (msg) {
-          if (msg.status !== S.STATUS.PENDING) {
-            throw new Error('[ABW] 留言未以 pending 建立，資料層有問題');
+          if (msg.status !== decision.status) {
+            throw new Error('[ABW] 資料層沒有採用自動審核的判定，實際狀態：' + msg.status);
           }
           field.value = '';
           if (counter) counter.textContent = '0 / ' + max;
+          var approved = msg.status === S.STATUS.APPROVED;
           if (notice) {
             /* 本機資料層＝沒有人收得到。這時候不能沿用「會出現在牆上」那句。 */
             var w = ABW.content.wall;
             var localOnly = ABW.provider === ABW.LocalProvider;
-            var lines = [localOnly && w.pendingNoticeLocal ? w.pendingNoticeLocal : w.pendingNotice];
+            var lines = [];
+            if (approved) {
+              lines.push(localOnly && w.approvedNoticeLocal ? w.approvedNoticeLocal : w.approvedNotice);
+            } else {
+              lines.push(localOnly && w.pendingNoticeLocal ? w.pendingNoticeLocal : w.pendingNotice);
+              /* ⛔ 攔下來一定要說為什麼。不說的話，投稿者只知道「別人的話上去了，
+               * 我的沒有」——那對一個剛說完傷口的人是二次拒絕。 */
+              var why = decision.reasons[0];
+              if (why) lines.push(why.why + '。');
+            }
+            /* ⛔ 遮掉了就一定要說。不說的話我們就是偷偷改了他的話——
+             * 而且他會以為自己的帳號還在上面，等著別人來找他。 */
+            if (scan.flags.indexOf('contact') !== -1) {
+              lines.push('另外，內容裡的帳號或聯絡方式已經拿掉了：留下帳號等於'
+                + '把真實身分綁回這則匿名留言，那是這個站最快失效的方式。');
+            }
             if (scan.flags.indexOf('masked') !== -1) {
               lines.push('為了保護被提到的人，內容裡的姓名與校名已經自動遮成 ' + ABW.guard.MASK_CHAR + '。');
             }
@@ -621,6 +644,11 @@
           }
           if (scan.flags.indexOf('self_harm') !== -1) {
             openHelpDialog(scan.hits.selfHarm);
+          }
+          /* 上牆了就要看得到。不重畫的話，通知說「已經在牆上」但牆上沒有他的話——
+           * 那句通知就是在說謊，而且他要重新整理才會發現不是。 */
+          if (approved) {
+            return ABW.provider.listApproved().then(render);
           }
         })
         .catch(function (err) {

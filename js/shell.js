@@ -16,6 +16,91 @@
 
   var ABW = global.ABW;
 
+  /* ---- 字級 ----
+   * 公共圖書館網站的常設功能，不是設定頁裡的選項。三級離散值，
+   * 基準掛在 html 上（見 styles.css 檔尾）。
+   *
+   * ⛔ 套用要在 mount() 之前、在腳本載入當下就做完，不能等 DOMContentLoaded：
+   *    等到那時候頁面已經用預設字級畫過一次，使用者會看到字跳一下。
+   */
+  var FS_KEY = 'abw.fontsize';
+  var FS_LEVELS = [
+    { id: 'sm', label: '小' },
+    { id: 'md', label: '中' },
+    { id: 'lg', label: '大' }
+  ];
+
+  /* ⛔ 不直接碰 localStorage：裝置偏好的唯一擁有者是 js/prefs.js。
+   * 無痕視窗會在存取當下就丟例外，那個 try/catch 只該寫一次、寫在那裡。 */
+  function readFs() {
+    var v = ABW.prefs.get(FS_KEY, 'md');
+    return FS_LEVELS.some(function (l) { return l.id === v; }) ? v : 'md';
+  }
+
+  function applyFs(id) {
+    if (id === 'md') document.documentElement.removeAttribute('data-fs');
+    else document.documentElement.setAttribute('data-fs', id);
+  }
+
+  applyFs(readFs());
+
+  function setFs(id) {
+    applyFs(id);
+    ABW.prefs.set(FS_KEY, id);
+    var btns = document.querySelectorAll('[data-fs-set]');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed',
+        btns[i].getAttribute('data-fs-set') === id ? 'true' : 'false');
+    }
+    /* 牆的軌道高度是**實測卡片高度**算出來的，字一變卡片就變高。
+     * 不重排的話軌道會疊在一起——這不是美觀問題，是留言互相蓋住。 */
+    if (ABW.wall && ABW.wall.render && ABW.provider) {
+      ABW.provider.listApproved().then(ABW.wall.render);
+    }
+  }
+
+  function buildTools() {
+    var box = document.createElement('div');
+    box.className = 'shell-tools';
+    var h = document.createElement('p');
+    h.className = 'shell-tools-h';
+    h.id = 'shell-fs-h';
+    h.textContent = '字級';
+    box.appendChild(h);
+    var group = document.createElement('div');
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-labelledby', 'shell-fs-h');
+    var now = readFs();
+    FS_LEVELS.forEach(function (lv) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'shell-fs';
+      b.setAttribute('data-fs', lv.id);
+      b.setAttribute('data-fs-set', lv.id);
+      b.setAttribute('aria-pressed', lv.id === now ? 'true' : 'false');
+      b.textContent = lv.label;
+      group.appendChild(b);
+    });
+    box.appendChild(group);
+    return box;
+  }
+
+  /* ---- 跳至主內容 ----
+   * 鍵盤使用者的第一個 Tab。⛔ 平常不可用 display:none 藏起來——
+   * 那樣它就不在 tab 序列裡，等於沒做。CSS 用 transform 移出畫面。 */
+  function mountSkipLink() {
+    if (document.querySelector('.skip-link')) return;
+    var main = document.querySelector('.shell-main main') || document.querySelector('main');
+    if (!main) return;
+    if (!main.id) main.id = 'abw-main';
+    main.setAttribute('tabindex', '-1');
+    var a = document.createElement('a');
+    a.className = 'skip-link';
+    a.href = '#' + main.id;
+    a.textContent = '跳至主要內容';
+    document.body.insertBefore(a, document.body.firstChild);
+  }
+
   function currentPage() {
     var f = location.pathname.split('/').pop();
     return f && f.length ? f : 'index.html';
@@ -149,6 +234,7 @@
     panel.setAttribute('aria-label', '網站導覽');
 
     panel.appendChild(buildBrand());
+    panel.appendChild(buildTools());
 
     var list = document.createElement('ul');
     items.forEach(function (item) {
@@ -173,6 +259,8 @@
         if (ABW.wall && ABW.wall.openHelp) ABW.wall.openHelp(null);
         return;
       }
+      var fs = ev.target.closest('[data-fs-set]');
+      if (fs) { ev.preventDefault(); setFs(fs.getAttribute('data-fs-set')); return; }
       var act = ev.target.closest('[data-shell-action]');
       if (!act) return;
       ev.preventDefault();
@@ -194,6 +282,7 @@
     if (!ABW || !ABW.content) return;
     var host = document.querySelector('[data-shell]');
     if (!host) return;
+    mountSkipLink();
     var panel = buildPanel(visibleNav(), currentPage());
     host.appendChild(panel);
     bind(host);
@@ -205,7 +294,7 @@
     }
   }
 
-  ABW.shell = { mount: mount, visibleNav: visibleNav };
+  ABW.shell = { mount: mount, visibleNav: visibleNav, setFs: setFs, readFs: readFs };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount);

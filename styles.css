@@ -80,6 +80,15 @@
    *    --card(5.12) 或 --warm-wash(4.72)。 */
   --panel:       #f2e9e1;
 
+  /* --- 實色識別帶（面板頁首、跳至主內容、當前字級）---
+   * ⛔ 不可用 --ink(#575279)：它當文字沒問題，攤成一大片實色會看出紫調，
+   *    跟整站的暖奶油不同調（2026-08-31 實際做出來才看見）。
+   *    這個深棕是 --warm(#9c5c08) 的同族暗色，白字 10.87:1。 */
+  --band:        #4a3a2c;
+  /* 帶子上的次要文字。⛔ 用實色不用 rgba(255,255,255,.8)：
+   * 半透明疊色算不出可稽核的比值。--band 上 8.87:1。 */
+  --panel-onink: #efe7dd;
+
   /* --- 求助鈕第二行的號碼：在 --warm 上 4.77:1 ---
    * ⛔ 不可改成 rgba(255,255,255,.9)——半透明疊色算不出可稽核的比值。 */
   --help-num:    #fdf1e0;
@@ -140,6 +149,7 @@
 * { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
+/* font-size 見檔尾「無障礙工具列」一節：基準掛在 html 才切得動 */
 
 body {
   margin: 0;
@@ -147,7 +157,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-  font-size: 17px;
+  font-size: 1rem;
   line-height: 1.75;
   /* 中文在螢幕上稍微鬆開字距比較好讀，也讓整體慢下來——這個網站不該讀起來很急 */
   letter-spacing: 0.015em;
@@ -975,6 +985,9 @@ body.shell-layout .shell-main .page-body { max-width: var(--measure); }
 .flag-self_harm { background: var(--warm); color: #fff; border-color: var(--warm); }
 .flag-masked { background: var(--warm-soft); color: #3a2b1d; border-color: var(--warm-soft); }
 .flag-criminal { background: var(--focus); color: #fff; border-color: var(--focus); }
+/* 自動審核攔下來的理由。刻意跟 flag 不同色：flag 是「這則留言有什麼特徵」，
+   hold 是「機器不敢自己決定」——審核者要一眼分得出這兩件事。 */
+.flag-hold { background: #fff; color: var(--ink); border-color: var(--line); }
 
 .kw-section { margin-top: 40px; }
 .kw-section textarea {
@@ -2003,4 +2016,118 @@ textarea:focus-visible,
  * 全部落在上面第 13 章的全域降速規則裡。 */
 @media (prefers-reduced-motion: reduce) {
   .triage-item:hover { transform: none; }
+}
+
+/* ================================================================
+ * 無障礙工具列（2026-08-31）
+ * 參考公共圖書館網站的做法：字級切換與「跳至主內容」是常設功能，
+ * 不是設定頁裡的選項。
+ * ================================================================ */
+
+/* 字級基準改掛在 html 上。
+ * ⛔ 原本 17px 寫在 body、html 留在瀏覽器預設的 16px，所以 --fs-1: 2rem
+ *    其實是 32px 不是註解寫的 34px——整組字階跟它自己的說明差了 6%。
+ *    掛到 html 之後註解的算法才成立，字級切換也才有東西可切。 */
+html { font-size: 17px; }
+html[data-fs="sm"] { font-size: 15px; }
+html[data-fs="lg"] { font-size: 20px; }
+
+/* 跳至主內容：鍵盤使用者的第一個 Tab。
+ * 平常看不見，但**不是 display:none**——那樣它就不在 tab 序列裡，等於沒做。 */
+.skip-link {
+  position: absolute;
+  left: var(--sp-3);
+  top: 0;
+  z-index: 100;
+  transform: translateY(-140%);
+  padding: 10px var(--sp-3);
+  background: var(--band);
+  color: #fff;                      /* --band 上 10.87:1 */
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  text-decoration: none;
+  font-size: var(--fs-4);
+  transition: transform 0.12s ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+/* ---- 面板識別段：實色帶 ----
+ * 公共機構網站的共同語彙是一條實色導覽帶。站名坐在實色上，
+ * 一眼就讀成「這是一個機構在維護的地方」，而不是某個人的作品。
+ * 順帶把橘色的用法從三處收斂成兩處（動作鈕、求助鈕）——
+ * 站名的橘色豎線在實色帶裡是多餘的，拿掉之後面板安靜很多。 */
+.shell-brand {
+  margin: calc(var(--sp-4) * -1) calc(var(--sp-3) * -1) var(--sp-3);
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  background: var(--band);
+  border-bottom: 0;
+}
+.shell-brand-name { color: #fff; }             /* --band 上 10.87:1 */
+.shell-brand-name::before { display: none; }
+.shell-brand-tag { color: var(--panel-onink); } /* --band 上 8.87:1 */
+
+/* ---- 字級切換列 ----
+ * 貼著識別帶下緣，對應圖書館網站把它放在頁首工具列的位置。 */
+.shell-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: 0 0 var(--sp-3);
+  padding: 0 var(--sp-1) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+.shell-tools-h {
+  margin: 0;
+  font-size: var(--fs-5);
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);           /* --panel 上 4.53:1 */
+}
+.shell-fs {
+  min-width: 2.2em;
+  padding: 4px 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--ink);                /* --card 上 7.00:1 */
+  font: inherit;
+  font-size: var(--fs-5);
+  line-height: 1.2;
+  cursor: pointer;
+}
+.shell-fs:hover { background: var(--warm-wash); }
+/* 當前字級：實色而不是只換邊框——只換邊框在三顆並排時分不出來 */
+.shell-fs[aria-pressed="true"] {
+  background: var(--band);
+  border-color: var(--band);
+  color: #fff;                      /* --band 上 10.87:1 */
+}
+/* 三顆鈕自己就是它們代表的字級，不必另外標示 */
+.shell-fs[data-fs="sm"] { font-size: 0.72rem; }
+.shell-fs[data-fs="lg"] { font-size: 1rem; }
+
+@media (max-width: 900px) {
+  /* 手機底部 tab 沒有識別帶，工具列也一起收起來——
+     行動瀏覽器本身就有字級設定，這裡再放一組只是佔掉 tab 的空間 */
+  .shell-tools { display: none; }
+}
+
+/* ---- 首頁不重複站名（桌機）----
+ * 站名與標語常駐在面板的識別帶上。首頁再說一次，等於同一句話在同一個畫面
+ * 出現兩次，還各自帶一條橘色豎線——那正是「吵」的來源。
+ * ⛔ 用 .sr-only 的做法而不是 display:none：h1 要留在無障礙樹與搜尋結果裡，
+ *    首頁沒有 h1 是實際的可及性缺陷（a11y-probe A4 在守標題層級）。
+ * ⛔ 只在桌機生效：手機把面板換成底部 tab、識別帶是隱藏的
+ *    （.shell-brand { display: none }），那裡首頁的站名是唯一的站名。
+ */
+@media (min-width: 901px) {
+  body.shell-layout .site-mark > h1,
+  body.shell-layout .site-mark > .tagline {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  /* 站名讓出來之後，句數就是首屏的第一句話——它本來就是這一頁的論述 */
+  body.shell-layout .site-mark > .wall-scale { margin-top: 0; }
 }

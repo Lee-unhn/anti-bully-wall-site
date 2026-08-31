@@ -44,6 +44,9 @@
     return myMessages().then(function (list) {
       var empty = document.querySelector('[data-share-empty]');
       if (empty) empty.hidden = list.length > 0;
+      /* 審核說明只對「已經說過話」的人有意義——沒留言的人看到它只是多一段字。 */
+      var note = document.querySelector('[data-mine-note]');
+      if (note) note.hidden = list.length === 0;
       host.innerHTML = '';
 
       return ABW.provider.getAlias().then(function (alias) {

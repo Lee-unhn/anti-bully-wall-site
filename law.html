@@ -9,7 +9,7 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=eb7d74e4">
+<link rel="stylesheet" href="styles.css?v=9081281e">
 </head>
 <body class="shell-layout">
 
@@ -22,14 +22,18 @@
   </header>
 
   <main class="page-body page-body--law">
-    <p class="draft-badge" data-c="law.draftBadge">以下法律說明尚在校訂中，請勿引用。</p>
-
+    <!-- ⛔ 這裡原本還有一個黃色草稿標記「以下法律說明尚在校訂中，請勿引用」。
+         2026-08-31 移除，理由是它現在描述的東西已經不存在：法律解釋在 2026-08-24
+         全部移出網站（存 docs/legal-draft-for-review.md），這一頁留下的是法條原文，
+         那不是草稿、也不需要校訂。三個說明區塊疊在頁首，第一個還說錯話。
+         解釋放回來時的保護是 G9 上線閘門（interpretive && !signedOff 直接擋部署），
+         不是這個標記——標記可以被忽略，閘門不行。 -->
     <p class="lede">被霸凌的時候最常出現的念頭是「這樣算嗎」、「講了會不會更糟」。
       這一頁把法規怎麼寫的、學校有哪些法定義務，原文放在這裡。</p>
 
-    <p class="law-note">這一頁目前只放<strong>法規原文與求助管道</strong>。
-      條文怎麼套用到你的狀況、可能牽涉哪些責任，屬於個案的法律判斷，
-      要由律師檢視過才會補上。真的需要判斷，直接打下面的專線或找法扶。</p>
+    <p class="law-note">這一頁只放<strong>法規原文與求助管道</strong>。
+      條文怎麼套用到你的狀況，是個案的法律判斷，要由律師檢視過才會補上——
+      需要判斷請直接打下面的專線或找法扶。</p>
 
     <!-- 章節清單：長頁面不該只能一路捲到底。
          ⛔ 不做 <details> 收合——折起來 Ctrl+F 找不到，法規與求助資訊不該被藏。 -->
@@ -123,14 +127,16 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=eb7d74e4"></script>
-<script src="js/schema.js?v=eb7d74e4"></script>
-<script src="js/keywords.js?v=eb7d74e4"></script>
-<script src="js/data-provider.js?v=eb7d74e4"></script>
-<script src="js/guard.js?v=eb7d74e4"></script>
-<script src="js/shell.js?v=eb7d74e4"></script>
-<script src="js/wall.js?v=eb7d74e4"></script>
-<script src="js/share.js?v=eb7d74e4"></script>
-<script src="js/app.js?v=eb7d74e4"></script>
+<script src="content.js?v=9081281e"></script>
+<script src="js/prefs.js?v=9081281e"></script>
+<script src="js/schema.js?v=9081281e"></script>
+<script src="js/keywords.js?v=9081281e"></script>
+<script src="js/data-provider.js?v=9081281e"></script>
+<script src="js/guard.js?v=9081281e"></script>
+<script src="js/triage.js?v=9081281e"></script>
+<script src="js/shell.js?v=9081281e"></script>
+<script src="js/wall.js?v=9081281e"></script>
+<script src="js/share.js?v=9081281e"></script>
+<script src="js/app.js?v=9081281e"></script>
 </body>
 </html>

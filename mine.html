@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>我說過的話</title>
-<meta name="description" content="只能分享你自己的留言。">
+<meta name="description" content="你在這台裝置上說過的話。">
 <!-- CSP 用 meta 而不是只靠 _headers：_headers 是 Cloudflare Pages 專用，
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=eb7d74e4">
+<link rel="stylesheet" href="styles.css?v=9081281e">
 </head>
 <body class="shell-layout">
 
@@ -22,18 +22,7 @@
   </header>
 
   <main class="page-body page-body--mine">
-    <p class="lede">你在這台裝置上說過的話會留在這裡，讓你知道那些話還在、走到哪一步了。</p>
-
-    <nav class="page-toc" aria-label="本頁章節">
-      <p class="page-toc-h">這一頁有兩段</p>
-      <ol>
-        <li><a href="#m-list"><span>你說過的話</span></a></li>
-        <li><a href="#m-how"><span>這一頁是怎麼運作的</span></a></li>
-      </ol>
-    </nav>
-
-    <section class="mine-sec" aria-labelledby="m-list">
-      <h2 id="m-list" class="page-sec-h">你說過的話</h2>
+    <section class="mine-sec" aria-label="你說過的話">
       <ul class="share-list" data-share-list></ul>
       <!-- 這一頁對新訪客 100% 是空的，所以空狀態就是這一頁的主畫面，
            不是一行灰字的註腳。 -->
@@ -48,14 +37,8 @@
         <p class="mine-empty-t">你還沒有在這台裝置上說過話。</p>
         <p class="mine-empty-a"><a class="mine-empty-btn" href="index.html#compose">說出你的事</a></p>
       </div>
-    </section>
-
-    <section class="mine-sec" aria-labelledby="m-how">
-      <h2 id="m-how" class="page-sec-h">這一頁是怎麼運作的</h2>
-      <p class="law-note">留言送出後會先經過人工檢視，通過才會出現在牆上；檢視期間它一樣列在上面，
-        你不會找不到自己剛剛說的話。這個網站還在準備階段，<strong>目前沒有人在審核</strong>，
-        所以你的留言會一直停在「檢視中」。它沒有消失，就在這台裝置裡。</p>
-      <p>這裡沒有分享或下載——說出來這件事的重量不該變成一張可以轉發的圖。這面牆會替你留著。</p>
+      <!-- 審核說明只在真的有留言時才出現：沒有留言的人不需要知道審核流程。 -->
+      <p class="law-note" data-mine-note hidden>大部分的話送出後會直接上牆。標著「檢視中」的是我們想先看過的那幾則——網站還在準備階段，目前沒有人在看，所以它們會停在那裡。</p>
     </section>
   </main>
 
@@ -75,14 +58,16 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=eb7d74e4"></script>
-<script src="js/schema.js?v=eb7d74e4"></script>
-<script src="js/keywords.js?v=eb7d74e4"></script>
-<script src="js/data-provider.js?v=eb7d74e4"></script>
-<script src="js/guard.js?v=eb7d74e4"></script>
-<script src="js/shell.js?v=eb7d74e4"></script>
-<script src="js/wall.js?v=eb7d74e4"></script>
-<script src="js/share.js?v=eb7d74e4"></script>
-<script src="js/app.js?v=eb7d74e4"></script>
+<script src="content.js?v=9081281e"></script>
+<script src="js/prefs.js?v=9081281e"></script>
+<script src="js/schema.js?v=9081281e"></script>
+<script src="js/keywords.js?v=9081281e"></script>
+<script src="js/data-provider.js?v=9081281e"></script>
+<script src="js/guard.js?v=9081281e"></script>
+<script src="js/triage.js?v=9081281e"></script>
+<script src="js/shell.js?v=9081281e"></script>
+<script src="js/wall.js?v=9081281e"></script>
+<script src="js/share.js?v=9081281e"></script>
+<script src="js/app.js?v=9081281e"></script>
 </body>
 </html>
