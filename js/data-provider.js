@@ -179,6 +179,11 @@
        *    整支 session 內用同一個代號，所以同一次造訪送出的多則留言
        *    名字仍然一致。 */
       getAlias: function () {
+        /* ⛔ 清掉舊版留在這台裝置上的固定代號。2026-08-31 之前它是存起來的，
+         * 不清的話那個化名會一直躺在使用者的瀏覽器裡——這條裁定要的正是
+         * 「裝置上不留下穩定的化名」，留著等於只做了一半。 */
+        var db0 = read();
+        if (db0.alias) { delete db0.alias; write(db0); }
         if (!sessionAlias) {
           sessionAlias = {
             name: pick(ALIAS_ADJ) + pick(ALIAS_NOUN),

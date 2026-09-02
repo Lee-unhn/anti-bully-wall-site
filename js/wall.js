@@ -744,6 +744,27 @@
     /* 視窗尺寸一變，軌道數與軌距就過期了——舞台高度變了、卡片高度也可能因換行變了。
      * 不重算的話牆會維持載入當下的樣子：把視窗拉高不會多出軌道，拉窄則會讓卡片
      * 疊在一起。debounce 是因為拖曳視窗會連續觸發，每次都重排會卡。 */
+    /* ⛔ 軌道數是「舞台量到多高」算出來的，而 boot() 跑的時候版面還沒穩：
+     * 字體還在載、面板還在注入、hero 高度還會變。量到偏小就只排 1-2 軌，
+     * 60 則留言於是擠在最上面一條，牆看起來是空的——而且時好時壞，
+     * 取決於那一次載入的時序（2026-08-31 線上實測：同一頁一次 3 軌一次 1 軌）。
+     *
+     * ResizeObserver 把這一類全部收掉：舞台高度只要真的變了就重排，
+     * 不必猜要等幾個 frame，也一併涵蓋字級切換與視窗縮放。
+     * ⛔ 要擋住「重排本身造成高度微調」的回授迴圈，所以設 24px 的門檻。 */
+    if (global.ResizeObserver && state.stage) {
+      var lastH = 0;
+      var ro = new global.ResizeObserver(function () {
+        var h = state.stage.getBoundingClientRect().height;
+        if (Math.abs(h - lastH) < 24) return;
+        lastH = h;
+        if (state.mode === 'board') { boardLayout(); paint(); return; }
+        seedPositions();
+        paint();
+      });
+      ro.observe(state.stage);
+    }
+
     var resizeTimer = null;
     var lastResize = 0;
 
