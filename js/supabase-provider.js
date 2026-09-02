@@ -77,6 +77,8 @@
       getAlias:      function () { return ABW.LocalProvider.getAlias(); },
       rememberMine:  function (id) { return ABW.LocalProvider.rememberMine(id); },
       listMineIds:   function () { return ABW.LocalProvider.listMineIds(); },
+      getSeenReactions: function () { return ABW.LocalProvider.getSeenReactions(); },
+      setSeenReactions: function (m) { return ABW.LocalProvider.setSeenReactions(m); },
       getViewMode:   function () { return ABW.LocalProvider.getViewMode(); },
       setViewMode:   function (m) { return ABW.LocalProvider.setViewMode(m); },
 

@@ -727,6 +727,20 @@
   /* ------------------------------------------------------------------ *
    * 啟動
    * ------------------------------------------------------------------ */
+  /* 定時重讀整面牆，順便算出「我不在的時候有人回應了我」。
+   * ⛔ 只在分頁看得見時跑：背景分頁一直打 API 是白費頻寬，而且對一個
+   *    只有幾十則留言的牆，離開又回來時再更新就夠了。 */
+  var warmthTimer = null;
+  function startWarmthPoll() {
+    if (warmthTimer || !ABW.warmthNotice) return;
+    warmthTimer = global.setInterval(function () {
+      if (document.hidden) return;
+      ABW.provider.listApproved().then(function (list) {
+        ABW.warmthNotice.check(list);
+      }).catch(function () { /* 網路不好就下次再說 */ });
+    }, 45000);
+  }
+
   function render(messages) {
     state.plane.innerHTML = '';
     state.items = messages.map(function (msg) {
@@ -896,6 +910,11 @@
       .then(function () { return ABW.provider.listApproved(); })
       .then(function (list) {
         render(list);
+        /* 有人給了我的話一句鼓勵 → 跳出來告訴我。
+         * ⛔ 吃的是這份已經下載回來的清單，不另外查「我的那幾則」——
+         *    那種查詢會讓伺服器知道哪幾則是誰寫的（見 warmth-notice.js）。 */
+        if (ABW.warmthNotice) ABW.warmthNotice.check(list);
+        startWarmthPoll();
         var status = document.querySelector('[data-c="wall.status"]');
         if (status) {
           /* ⛔ 這一行是鼓勵不是系統狀態（裁定 2026-08-31）。句數已經在首屏

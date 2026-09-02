@@ -2714,3 +2714,64 @@ body.admin {
   background: var(--warm); color: #fff; font: inherit; font-weight: 700;
   padding: 8px 18px; cursor: pointer; box-shadow: 3px 3px 0 var(--edge);
 }
+
+/* ---- 溫暖通知（2026-09-02）----
+ * 有人給了你的話一句鼓勵時跳出來。⛔ 不做紅點也不做未讀數字：
+ * 這面牆上的人不需要再多一個要清空的東西。出現一次，幾秒後自己走。
+ */
+.warmth-toasts {
+  position: fixed;
+  left: 50%;
+  bottom: 92px;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;   /* ⛔ 不可以擋住底下的輸入框 */
+  width: min(92vw, 30rem);
+}
+.warmth-toast {
+  padding: 11px 18px;
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-pill);
+  background: var(--warm);
+  color: #fff;                       /* --warm 上 5.32:1 */
+  font-size: var(--fs-4);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 4px 4px 0 var(--edge);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.warmth-toast.is-in { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* 位移拿掉，但淡入留著——完全不動的話它會突然出現，反而更嚇人 */
+  .warmth-toast { transform: none; transition: opacity 0.28s ease; }
+  .warmth-toast.is-in { transform: none; }
+}
+
+/* ================================================================
+ * 手機版修正（2026-09-02）
+ * ⛔ 這是第一次真的看手機版。實測 375x812：求助浮動鈕蓋住「送出」鈕
+ *    52x28px——蓋掉超過一半，主要動作在手機上被擋住。
+ *    整輪粗獷風改版都沒看過手機，這種錯只有把畫面叫出來才看得到。
+ * ================================================================ */
+@media (max-width: 900px) {
+  /* 求助鈕移到輸入列**上方**。
+   * ⛔ 不可以只是縮小或移到左邊：左邊會蓋到輸入框，縮小會讓最需要它的人
+   *    更難按到。它必須整顆在輸入列之上。
+   * 64px = tab bar，68px = 輸入列，10px = 間距。 */
+  .shell-help {
+    /* 22px 而不是 10px：硬邊投影會多佔 4px，10px 時實測仍壓在送出鈕上緣 8px。
+     * ⛔ 這裡要留的是「投影也不重疊」的距離，不是「方框剛好不重疊」。 */
+    bottom: calc(64px + 68px + 22px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* 通知也要墊高，否則會被輸入列與 tab bar 蓋掉 */
+  .warmth-toasts { bottom: calc(64px + 68px + 76px + env(safe-area-inset-bottom, 0px)); }
+}

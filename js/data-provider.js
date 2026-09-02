@@ -17,6 +17,7 @@
  *   listRejected()                  -> Message[]      // 後台限定，退回不刪除
  *   createMessage(draft)            -> Message        // 狀態由自動審核決定
  *   listMineIds()                   -> string[]       // 本機送出過的留言 id，永不上傳
+ *   getSeenReactions() / setSeenReactions(map)         // 同上，永不上傳
  *   rememberMine(id)                -> true
  *   setStatus(id, status)           -> Message        // 後台限定
  *   react(id, reactionId)           -> Message
@@ -207,6 +208,23 @@
       listMineIds: function () {
         var db = read();
         return Promise.resolve((db.mineIds || []).slice());
+      },
+
+      /* ---- 「上次看到的溫暖次數」----
+       * 用來算出「我不在的時候有人回應了我」。
+       * ⛔ 只存在本機、永不上傳。伺服器一旦知道「這台裝置在追蹤哪幾則」，
+       *    就等於知道那幾則是誰寫的——那正是這個站不做的事。
+       * ⛔ 也因此比對用的資料來自「整面牆」那份既有的請求，不另外發
+       *    「查這幾個 id」的查詢：那種查詢本身就是一條線索。 */
+      getSeenReactions: function () {
+        var db = read();
+        return Promise.resolve(db.seenReactions || {});
+      },
+      setSeenReactions: function (map) {
+        var db = read();
+        db.seenReactions = map;
+        write(db);
+        return Promise.resolve(map);
       },
 
       listApproved: function () {
