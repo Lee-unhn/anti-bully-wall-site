@@ -446,7 +446,7 @@
    * 彈幕迴圈（一支 rAF 統管全部，不是每則各開一支 timer）
    * ------------------------------------------------------------------ */
   function step(ts) {
-    if (state.mode !== 'danmaku' || state.reduced) { state.raf = null; return; }
+    if (state.mode !== 'danmaku' || state.paused) { state.raf = null; return; }
     var dt = state.lastTs ? Math.min((ts - state.lastTs) / 1000, 0.1) : 0;
     state.lastTs = ts;
 
@@ -474,7 +474,7 @@
   }
 
   function startFloat() {
-    if (state.reduced || state.raf) return;
+    if (state.paused || state.raf) return;
     state.lastTs = 0;
     state.raf = requestAnimationFrame(step);
   }
@@ -867,18 +867,15 @@
         pause.setAttribute('data-state', state.paused ? 'paused' : 'flowing');
       };
       label();
+      /* ⛔ 暫停＝**原地凍住**，不換版面。
+       * 2026-08-31 第一版是切到靜態格狀（board），結果 `.wall-frame` 的
+       * overflow:hidden 把格子裁掉，只看得到 8 張而且滾輪捲不動
+       * （Lee 回報）。切換版面本來就多餘：使用者要的是「停下來讓我看」，
+       * 不是「換一種排法」。停在原地，捲動與所有位置都原封不動。 */
       pause.addEventListener('click', function () {
         state.paused = !state.paused;
-        if (state.paused) {
-          stopFloat();
-          setMode('board');
-          document.documentElement.classList.remove('force-motion');
-        } else {
-          document.documentElement.classList.add('force-motion');
-          state.mode = 'danmaku';
-          seedPositions();
-          setMode('danmaku');
-        }
+        if (state.paused) stopFloat();
+        else startFloat();
         label();
       });
       bar.insertBefore(pause, bar.firstChild);
