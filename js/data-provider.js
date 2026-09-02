@@ -312,6 +312,21 @@
         return Promise.resolve(db.keywords || ABW.defaultKeywords());
       },
 
+      /* ---- 站內可編輯內容 ----
+       * 存的是**覆寫值**，不是整份內容。沒有覆寫的部分一律沿用 content.js
+       * 的預設，所以資料庫空了、壞了、或還沒接上時，網站仍然是完整的
+       * （⛔ 這是刻意的：內容全部搬進資料庫的話，資料庫一出事就是空白站）。 */
+      getSiteContent: function () {
+        var db = read();
+        return Promise.resolve(db.siteContent || {});
+      },
+      setSiteContent: function (data) {
+        var db = read();
+        db.siteContent = data;
+        write(db);
+        return Promise.resolve(data);
+      },
+
       setKeywords: function (set) {
         var db = read();
         db.keywords = set;

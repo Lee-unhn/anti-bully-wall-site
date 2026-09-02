@@ -108,6 +108,16 @@
         return req('POST', REST + '/rpc/add_reaction', { msg_id: id, reaction: reactionId });
       },
 
+      getSiteContent: function () {
+        return req('GET', REST + '/site_content?select=data&id=eq.1')
+          .then(function (rows) { return (rows && rows[0] && rows[0].data) || {}; });
+      },
+      setSiteContent: function (data) {
+        return req('PATCH', REST + '/site_content?id=eq.1',
+          { data: data, updated_at: new Date().toISOString() })
+          .then(function () { return data; });
+      },
+
       getKeywords: function () {
         return req('GET', REST + '/keyword_set?select=data&id=eq.1')
           .then(function (rows) {

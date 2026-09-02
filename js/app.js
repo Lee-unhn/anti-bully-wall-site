@@ -138,6 +138,13 @@
   }
 
   function boot() {
+    /* ⛔ 內容覆寫必須在**任何渲染之前**疊好。晚一步的話畫面會先閃一次
+     * 預設文案再換成後台改過的——那對「後台改了什麼」的驗收是災難：
+     * 改的人會以為沒生效。 */
+    return ABW.contentMerge.load().then(bootRender);
+  }
+
+  function bootRender() {
     renderStaticCopy();
     renderTriage();
     renderReactionLegend();

@@ -9,7 +9,7 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://xppcelhclohxdkzwijbm.supabase.co; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=cf9d7900">
+<link rel="stylesheet" href="styles.css?v=9450dbf8">
 </head>
 <body class="admin">
 
@@ -70,6 +70,20 @@
     <p class="admin-empty" data-admin="rejected-empty">沒有退回過的留言。</p>
   </section>
 
+  <section class="kw-section" aria-labelledby="rx-h">
+    <h2 id="rx-h">溫暖回應的按鈕文字</h2>
+    <!-- ⛔ 只能改文字，不能改數量也不能改代號：
+         代號是資料庫裡計數的鍵，換掉等於所有既有的溫暖次數對不上；
+         五個是產品裁定（2026-08-17），排行與自由留言都不做。 -->
+    <p class="admin-note">五個按鈕的文字。數量固定五個、代號不可更動——代號是資料庫裡計數的鍵。
+      留白會被忽略（沒有文字的鼓勵鈕等於藏起來）。</p>
+    <form data-admin="rx-form">
+      <div data-admin="rx-fields"></div>
+      <p><button type="submit">儲存</button></p>
+    </form>
+    <p class="notice" data-admin="rx-note" hidden></p>
+  </section>
+
   <section class="kw-section" aria-labelledby="k-h">
     <h2 id="k-h">姓名遮蔽清單</h2>
     <p class="admin-note" data-admin="kw-summary">—</p>
@@ -84,15 +98,16 @@
   </section>
 </main>
 
-<script src="js/config.js?v=cf9d7900"></script>
-<script src="content.js?v=cf9d7900"></script>
-<script src="js/prefs.js?v=cf9d7900"></script>
-<script src="js/schema.js?v=cf9d7900"></script>
-<script src="js/keywords.js?v=cf9d7900"></script>
-<script src="js/data-provider.js?v=cf9d7900"></script>
-<script src="js/supabase-provider.js?v=cf9d7900"></script>
-<script src="js/guard.js?v=cf9d7900"></script>
-<script src="js/triage.js?v=cf9d7900"></script>
-<script src="js/admin.js?v=cf9d7900"></script>
+<script src="js/config.js?v=9450dbf8"></script>
+<script src="content.js?v=9450dbf8"></script>
+<script src="js/prefs.js?v=9450dbf8"></script>
+<script src="js/schema.js?v=9450dbf8"></script>
+<script src="js/keywords.js?v=9450dbf8"></script>
+<script src="js/data-provider.js?v=9450dbf8"></script>
+<script src="js/supabase-provider.js?v=9450dbf8"></script>
+<script src="js/content-merge.js?v=9450dbf8"></script>
+<script src="js/guard.js?v=9450dbf8"></script>
+<script src="js/triage.js?v=9450dbf8"></script>
+<script src="js/admin.js?v=9450dbf8"></script>
 </body>
 </html>

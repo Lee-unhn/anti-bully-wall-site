@@ -194,6 +194,67 @@
     });
   }
 
+  /* ---- 溫暖回應的按鈕文字 ----
+   * ⛔ 只改 label。id 是資料庫裡 reactions jsonb 的鍵，換掉等於所有既有的
+   *    溫暖次數對不上；數量五個是 2026-08-17 的產品裁定。
+   *    所以這裡渲染的是「五個固定欄位」，不是一份可增刪的清單。 */
+  function renderReactions() {
+    var host = $('[data-admin="rx-fields"]');
+    if (!host) return Promise.resolve();
+    return ABW.provider.getSiteContent().then(function (over) {
+      var labels = (over && over.reactions) || {};
+      host.innerHTML = '';
+      S.REACTIONS.forEach(function (r) {
+        var wrap = document.createElement('p');
+        var id = 'rx-' + r.id;
+        var lab = document.createElement('label');
+        lab.setAttribute('for', id);
+        lab.textContent = r.glyph + '　' + r.id;
+        var inp = document.createElement('input');
+        inp.type = 'text';
+        inp.id = id;
+        inp.maxLength = 12;
+        inp.setAttribute('data-rx', r.id);
+        inp.value = labels[r.id] || r.label;
+        wrap.appendChild(lab);
+        wrap.appendChild(inp);
+        host.appendChild(wrap);
+      });
+    });
+  }
+
+  function bindReactionForm() {
+    var form = $('[data-admin="rx-form"]');
+    if (!form) return;
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var note = $('[data-admin="rx-note"]');
+      var labels = {};
+      var blank = 0;
+      Array.prototype.forEach.call(form.querySelectorAll('[data-rx]'), function (inp) {
+        var v = inp.value.trim();
+        if (!v) { blank++; return; }      /* ⛔ 留白忽略，不是存空字串 */
+        labels[inp.getAttribute('data-rx')] = v;
+      });
+      ABW.provider.getSiteContent()
+        .then(function (over) {
+          over = over || {};
+          over.reactions = labels;
+          return ABW.provider.setSiteContent(over);
+        })
+        .then(function () {
+          if (note) {
+            note.textContent = '已儲存。' + (blank ? '（有 ' + blank + ' 個留白，那幾個會沿用預設文字）' : '')
+              + '前台重新整理就會看到。';
+            note.hidden = false;
+          }
+        })
+        .catch(function (err) {
+          if (note) { note.textContent = '儲存失敗：' + err.message; note.hidden = false; }
+        });
+    });
+  }
+
   function bindKeywordForm() {
     var form = $('[data-admin="kw-form"]');
     if (!form) return;
@@ -249,9 +310,11 @@
     if (!isLocalOnly() && !needsLogin()) { lockDown(); return Promise.resolve(); }
     renderProviderBanner();
     bindKeywordForm();
+    bindReactionForm();
     return ABW.provider.init()
       .then(render)
       .then(renderKeywords)
+      .then(renderReactions)
       .catch(function (err) {
         console.error('[ABW] 後台啟動失敗', err);
         throw err;
