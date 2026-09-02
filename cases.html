@@ -8,8 +8,8 @@
 <!-- CSP 用 meta 而不是只靠 _headers：_headers 是 Cloudflare Pages 專用，
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=3ed1143d">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://xppcelhclohxdkzwijbm.supabase.co; font-src 'self'; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css?v=7e4b2a97">
 </head>
 <body class="shell-layout">
 
@@ -149,18 +149,18 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="js/config.js?v=3ed1143d"></script>
-<script src="content.js?v=3ed1143d"></script>
-<script src="js/prefs.js?v=3ed1143d"></script>
-<script src="js/schema.js?v=3ed1143d"></script>
-<script src="js/keywords.js?v=3ed1143d"></script>
-<script src="js/data-provider.js?v=3ed1143d"></script>
-<script src="js/supabase-provider.js?v=3ed1143d"></script>
-<script src="js/guard.js?v=3ed1143d"></script>
-<script src="js/triage.js?v=3ed1143d"></script>
-<script src="js/shell.js?v=3ed1143d"></script>
-<script src="js/wall.js?v=3ed1143d"></script>
-<script src="js/share.js?v=3ed1143d"></script>
-<script src="js/app.js?v=3ed1143d"></script>
+<script src="js/config.js?v=7e4b2a97"></script>
+<script src="content.js?v=7e4b2a97"></script>
+<script src="js/prefs.js?v=7e4b2a97"></script>
+<script src="js/schema.js?v=7e4b2a97"></script>
+<script src="js/keywords.js?v=7e4b2a97"></script>
+<script src="js/data-provider.js?v=7e4b2a97"></script>
+<script src="js/supabase-provider.js?v=7e4b2a97"></script>
+<script src="js/guard.js?v=7e4b2a97"></script>
+<script src="js/triage.js?v=7e4b2a97"></script>
+<script src="js/shell.js?v=7e4b2a97"></script>
+<script src="js/wall.js?v=7e4b2a97"></script>
+<script src="js/share.js?v=7e4b2a97"></script>
+<script src="js/app.js?v=7e4b2a97"></script>
 </body>
 </html>

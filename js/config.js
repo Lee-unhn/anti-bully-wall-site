@@ -14,8 +14,8 @@
   var ABW = global.ABW = global.ABW || {};
   ABW.config = {
     supabase: {
-      url: '',        /* 例：https://xxxxxxxx.supabase.co */
-      anonKey: ''     /* Supabase 專案的 anon / public key */
+      url: 'https://xppcelhclohxdkzwijbm.supabase.co',
+      anonKey: 'sb_publishable_HqR--dUWLhvFXacK211aWA_o_wPyXqm'
     }
   };
 })(window);
