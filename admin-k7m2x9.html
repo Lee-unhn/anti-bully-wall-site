@@ -9,7 +9,7 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=0d4d26f8">
+<link rel="stylesheet" href="styles.css?v=3ed1143d">
 </head>
 <body class="admin">
 
@@ -24,6 +24,19 @@
 </header>
 
 <main>
+  <!-- 接上真後端時才會出現。⛔ 沒有登入的話，後端一上線任何人都能
+       通過／退回（人類關卡 ABW-AUTH）。 -->
+  <form class="admin-login" data-admin="login" hidden>
+    <h2>先登入</h2>
+    <p class="admin-note">這個網站已經接上資料庫。要審核留言請先登入管理員帳號。</p>
+    <p><label for="ad-email">Email</label>
+       <input id="ad-email" type="email" autocomplete="username" required></p>
+    <p><label for="ad-pw">密碼</label>
+       <input id="ad-pw" type="password" autocomplete="current-password" required></p>
+    <p><button type="submit">登入</button></p>
+    <p class="notice" data-admin="login-note" hidden></p>
+  </form>
+
   <ul class="admin-stats" aria-label="目前狀態">
     <li class="admin-stat admin-stat--wait"><b data-admin="count">0</b><span>等你看</span></li>
     <li class="admin-stat admin-stat--live"><b data-admin="count-approved">0</b><span>在牆上</span></li>
@@ -71,13 +84,15 @@
   </section>
 </main>
 
-<script src="content.js?v=0d4d26f8"></script>
-<script src="js/prefs.js?v=0d4d26f8"></script>
-<script src="js/schema.js?v=0d4d26f8"></script>
-<script src="js/keywords.js?v=0d4d26f8"></script>
-<script src="js/data-provider.js?v=0d4d26f8"></script>
-<script src="js/guard.js?v=0d4d26f8"></script>
-<script src="js/triage.js?v=0d4d26f8"></script>
-<script src="js/admin.js?v=0d4d26f8"></script>
+<script src="js/config.js?v=3ed1143d"></script>
+<script src="content.js?v=3ed1143d"></script>
+<script src="js/prefs.js?v=3ed1143d"></script>
+<script src="js/schema.js?v=3ed1143d"></script>
+<script src="js/keywords.js?v=3ed1143d"></script>
+<script src="js/data-provider.js?v=3ed1143d"></script>
+<script src="js/supabase-provider.js?v=3ed1143d"></script>
+<script src="js/guard.js?v=3ed1143d"></script>
+<script src="js/triage.js?v=3ed1143d"></script>
+<script src="js/admin.js?v=3ed1143d"></script>
 </body>
 </html>

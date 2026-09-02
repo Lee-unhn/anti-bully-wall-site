@@ -219,8 +219,34 @@
     });
   }
 
+  /* 接上真後端時，改成要求登入而不是直接停用。
+   * ⛔ lockDown() 沒有被刪：它守的是「有後端、但這個 provider 連登入都沒有」
+   *    這種情況——那種後台一律不准運作（G23／G30 在守）。 */
+  function needsLogin() {
+    return !isLocalOnly() && typeof ABW.provider.signIn === 'function';
+  }
+
+  function showLogin() {
+    var form = $('[data-admin="login"]');
+    if (!form) { lockDown(); return; }
+    form.hidden = false;
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var note = $('[data-admin="login-note"]');
+      ABW.provider.signIn($('#ad-email').value.trim(), $('#ad-pw').value)
+        .then(function () {
+          form.hidden = true;
+          return boot();
+        })
+        .catch(function () {
+          if (note) { note.textContent = '登入失敗。帳號或密碼不對，或這個帳號不是管理員。'; note.hidden = false; }
+        });
+    });
+  }
+
   function boot() {
-    if (!isLocalOnly()) { lockDown(); return Promise.resolve(); }
+    if (needsLogin() && !ABW.provider.signedIn()) { showLogin(); return Promise.resolve(); }
+    if (!isLocalOnly() && !needsLogin()) { lockDown(); return Promise.resolve(); }
     renderProviderBanner();
     bindKeywordForm();
     return ABW.provider.init()

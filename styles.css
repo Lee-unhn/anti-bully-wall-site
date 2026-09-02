@@ -2692,3 +2692,25 @@ body.admin {
   box-shadow: 3px 3px 0 var(--edge);
 }
 .admin-scope[data-state="server"] { background: var(--warm); color: #fff; }
+
+/* 後台登入。⛔ 沒有登入的話，後端一上線任何人都能通過／退回。 */
+.admin-login {
+  max-width: 34ch;
+  margin: var(--sp-4) 0;
+  padding: var(--sp-4);
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+.admin-login h2 { margin-top: 0; }
+.admin-login label { display: block; font-size: var(--fs-4); font-weight: 700; margin-bottom: 4px; }
+.admin-login input {
+  width: 100%; padding: 8px 11px; font: inherit;
+  border: 2px solid var(--edge); border-radius: 11px; background: #fff; color: var(--ink);
+}
+.admin-login button {
+  border: 2px solid var(--edge); border-radius: 11px;
+  background: var(--warm); color: #fff; font: inherit; font-weight: 700;
+  padding: 8px 18px; cursor: pointer; box-shadow: 3px 3px 0 var(--edge);
+}
