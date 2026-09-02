@@ -42,7 +42,7 @@
     /* 這台裝置送出過的留言 id（物件當 set 用）。⛔ 只用來標「你說的」，
      * 永不上傳——見 data-provider 的 listMineIds 註解。 */
     mineIds: null,
-    savedMode: null,       /* 使用者上次明確選過的檢視模式 */          /* 本機代號，用來標出「這是你說的」 */
+          /* 本機代號，用來標出「這是你說的」 */
     stage: null,
     plane: null,
     raf: null,
@@ -820,26 +820,10 @@
      * 按鈕在說謊——使用者只會覺得壞了。
      * ⛔ 這不是繞過無障礙設定：預設仍然尊重系統設定，只有本人親手按下去才開始動，
      *    而且再按「全部攤開」就停。自動播放與手動播放是兩件事。 */
-    document.querySelectorAll('[data-wall-mode]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var mode = btn.getAttribute('data-wall-mode');
-        /* 記住使用者明確按過的選擇。下次進站直接照這個走，
-         * 不必每次重按——尤其是系統開了「減少動態」的人。 */
-        if (ABW.provider.setViewMode) ABW.provider.setViewMode(mode);
-        if (mode === 'danmaku' && state.reduced) {
-          state.reduced = false;
-          document.documentElement.classList.add('force-motion');
-          /* ⛔ 先把 state.mode 設好再排版。applyStageHeight() 會依 state.mode
-           * 分支——mode 還停在 'board' 時它會「清掉」舞台高度而不是設定，
-           * 結果外框塌成 0px、整面牆消失（2026-08-24 實測）。 */
-          state.mode = mode;
-          seedPositions();
-        }
-        setMode(mode);
-      });
-    });
-    var reset = document.querySelector('[data-wall-reset]');
-    if (reset) reset.addEventListener('click', resetBoardView);
+    /* ⛔ 這裡原本綁三顆鈕（流動／全部攤開／回到原點）。2026-08-31 全部拿掉。
+     * 牆永遠流動；靜態版只留給系統開了 reduced-motion 的人，而且是自動的，
+     * 不再是使用者可選項——也因此不再需要「使用者上次選了什麼」這件事。
+     * ⛔ setMode() 與 board 版面沒有刪：它們仍然是 reduced-motion 的落點。 */
 
     bindBoardEvents();
     bindHelpDialog();
@@ -852,10 +836,6 @@
         state.mineIds = {};
         ids.forEach(function (id) { state.mineIds[id] = true; });
       })
-      .then(function () {
-        return ABW.provider.getViewMode ? ABW.provider.getViewMode() : null;
-      })
-      .then(function (mode) { state.savedMode = mode; })
       .then(function () { return ABW.provider.ensureSeeds(ABW.content.seeds); })
       .then(function () { return ABW.provider.listApproved(); })
       .then(function (list) {
@@ -870,24 +850,17 @@
             : ABW.content.wall.emptyNotice;
           /* reduce 開著的人預設看到靜態牆——要告訴他可以自己打開，否則
            * 他只會以為牆壞了（Lee 2026-08-20 就是這樣回報的）。附註，不是主詞。 */
-          status.textContent = state.reduced && ABW.content.wall.statusMotionHint
-            ? base + '　' + ABW.content.wall.statusMotionHint
-            : base;
+          /* ⛔ 這裡原本會附加「想看它們動起來，按「流動」。」。
+           * 切換鈕 2026-08-31 拿掉之後那句話指向一顆不存在的按鈕。 */
+          status.textContent = base;
         }
-        /* reduced-motion 使用者直接進靜態的畫布模式，不做漂浮 */
-        /* 預設值的順位：
-         *   1. 使用者上次明確按過的模式（他自己的意思最大）
-         *   2. 系統的 reduced-motion 設定（沒表達過意見時尊重它）
-         * ⛔ 不要拿掉第 2 條——對開了減少動態的人自動播放動畫，
-         *    對前庭系統敏感的使用者是實際傷害，不是偏好問題。 */
-        var pref = state.savedMode;
-        if (pref === 'danmaku' && state.reduced) {
-          state.reduced = false;
-          document.documentElement.classList.add('force-motion');
-          state.mode = 'danmaku';
-          seedPositions();
-        }
-        setMode(pref || (state.reduced ? 'board' : 'danmaku'));
+        /* 模式只剩一條規則：系統說要減少動態就靜態，其餘一律流動。
+         * ⛔ 不可拿掉這個分支——對開了減少動態的人自動播放動畫，
+         *    對前庭系統敏感的使用者是實際傷害，不是偏好問題（G11 在守）。
+         * ⛔ 也不再有「使用者上次選了什麼」：切換鈕 2026-08-31 已移除，
+         *    留著讀舊偏好的話，以前按過「全部攤開」的人會永遠看到靜態牆，
+         *    而且再也沒有按鈕可以切回來。 */
+        setMode(state.reduced ? 'board' : 'danmaku');
         return maybeMountFpsBadge().then(function () { return list.length; });
       })
       .catch(function (err) {

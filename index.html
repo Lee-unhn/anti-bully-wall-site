@@ -11,7 +11,7 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=f7697cc7">
+<link rel="stylesheet" href="styles.css?v=bed196b9">
 </head>
 <body class="shell-layout">
 
@@ -32,10 +32,12 @@
   <section id="wall" class="wall-region" aria-labelledby="wall-h">
     <h2 id="wall-h" class="sr-only">留言牆</h2>
 
-    <div class="wall-toolbar" role="group" aria-label="檢視方式">
-      <button type="button" data-wall-mode="danmaku" aria-pressed="true">流動</button>
-      <button type="button" data-wall-mode="board" aria-pressed="false">全部攤開</button>
-      <button type="button" data-wall-reset>回到原點</button>
+    <!-- ⛔ 這裡原本有三顆鈕：流動／全部攤開／回到原點。2026-08-31 全部拿掉
+         （Lee：好像可以不用，直接流動）。牆永遠是流動的，沒有檢視模式可切。
+         ⛔ 靜態版沒有消失，只是不再是使用者選項：系統開了 prefers-reduced-motion
+         的人自動拿到它（G11 在守）。那是他們自己對作業系統下的設定，
+         靜態就是正確結果，不需要再問他要不要。 -->
+    <div class="wall-toolbar">
       <span class="wall-status hint" data-c="wall.status">載入中…</span>
     </div>
 
@@ -80,16 +82,16 @@
   <button type="button" data-help-close>我知道了</button>
 </dialog>
 
-<script src="content.js?v=f7697cc7"></script>
-<script src="js/prefs.js?v=f7697cc7"></script>
-<script src="js/schema.js?v=f7697cc7"></script>
-<script src="js/keywords.js?v=f7697cc7"></script>
-<script src="js/data-provider.js?v=f7697cc7"></script>
-<script src="js/guard.js?v=f7697cc7"></script>
-<script src="js/triage.js?v=f7697cc7"></script>
-<script src="js/shell.js?v=f7697cc7"></script>
-<script src="js/wall.js?v=f7697cc7"></script>
-<script src="js/share.js?v=f7697cc7"></script>
-<script src="js/app.js?v=f7697cc7"></script>
+<script src="content.js?v=bed196b9"></script>
+<script src="js/prefs.js?v=bed196b9"></script>
+<script src="js/schema.js?v=bed196b9"></script>
+<script src="js/keywords.js?v=bed196b9"></script>
+<script src="js/data-provider.js?v=bed196b9"></script>
+<script src="js/guard.js?v=bed196b9"></script>
+<script src="js/triage.js?v=bed196b9"></script>
+<script src="js/shell.js?v=bed196b9"></script>
+<script src="js/wall.js?v=bed196b9"></script>
+<script src="js/share.js?v=bed196b9"></script>
+<script src="js/app.js?v=bed196b9"></script>
 </body>
 </html>

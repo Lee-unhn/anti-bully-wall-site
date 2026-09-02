@@ -2119,8 +2119,13 @@ html[data-fs="lg"] { font-size: 20px; }
  *    （.shell-brand { display: none }），那裡首頁的站名是唯一的站名。
  */
 @media (min-width: 901px) {
-  body.shell-layout .site-mark > h1,
-  body.shell-layout .site-mark > .tagline {
+  /* ⛔ 必須排除 .page-head。分頁的頁首也掛著 .site-mark，但它的 h1 是
+   * **這一頁的標題**（霸凌是什麼樣子／你該知道的三件事／我說過的話），
+   * 不是站名——2026-08-31 這條規則上線後，三個分頁的標題整整消失了一段時間，
+   * 而且因為只是 .sr-only、DOM 還在，a11y-probe 的標題層級檢查照樣全綠。
+   * 這種只有「真的看畫面」才抓得到的錯，是這個專案第三次了。 */
+  body.shell-layout .site-mark:not(.page-head) > h1,
+  body.shell-layout .site-mark:not(.page-head) > .tagline {
     position: absolute;
     width: 1px; height: 1px;
     padding: 0; margin: -1px;
@@ -2536,3 +2541,36 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
 .msg-card { z-index: 1; }
 .msg-card:hover,
 .msg-card:focus-within { z-index: 6; }
+
+/* ---- 返回鈕吃全站同一套形狀（2026-08-31）----
+ * Lee：分頁裡「回到這面牆」的按鈕太簡單，要跟這面牆的按鈕統一風格。
+ * 原本是一條純文字連結，站在一頁粗框硬影的元件中間像是漏做的。
+ * ⛔ 仍然是 <a>：它是導覽不是動作，語意不可以因為長得像按鈕就改成 button。
+ */
+.page-back { margin: 0 0 var(--sp-2); }
+.page-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 11px;
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--ink);                 /* --card 上 7.00:1 */
+  font-size: var(--fs-4);
+  font-weight: 700;
+  line-height: 1.4;
+  text-decoration: none;
+  box-shadow: 3px 3px 0 var(--edge);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+.page-back a:hover {
+  background: var(--warm-soft);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+.page-back a:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--edge); }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-back a:hover, .page-back a:active { transform: none; }
+}
