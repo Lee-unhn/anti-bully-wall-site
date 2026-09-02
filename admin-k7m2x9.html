@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>留言審核後台</title>
+<!-- CSP 用 meta 而不是只靠 _headers：_headers 是 Cloudflare Pages 專用，
+     GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
+     meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; base-uri 'self'; form-action 'self'">
+<link rel="stylesheet" href="styles.css?v=0d4d26f8">
+</head>
+<body class="admin">
+
+<header class="admin-head">
+  <h1>留言審核後台</h1>
+  <p class="admin-sub">這裡只會出現機器判不準的留言。判得準的已經直接上牆了。</p>
+  <p class="admin-provider">資料層：<strong data-admin="provider">—</strong></p>
+  <!-- ⛔ 這塊警語不可拿掉。這一頁是公開可達的，而在 LocalProvider 下它
+       只看得到開啟它的那台瀏覽器自己的留言——沒有這段字，它看起來會像
+       一個真的在管理全站的後台，那是對使用它的人說謊（G32 在守）。 -->
+  <p class="admin-scope" data-admin="scope">—</p>
+</header>
+
+<main>
+  <ul class="admin-stats" aria-label="目前狀態">
+    <li class="admin-stat admin-stat--wait"><b data-admin="count">0</b><span>等你看</span></li>
+    <li class="admin-stat admin-stat--live"><b data-admin="count-approved">0</b><span>在牆上</span></li>
+    <li class="admin-stat admin-stat--back"><b data-admin="count-rejected">0</b><span>已退回</span></li>
+  </ul>
+
+  <section aria-labelledby="q-h">
+    <h2 id="q-h">等你看的留言</h2>
+    <!-- ⛔ 「為什麼要你看」這一欄不可拿掉：佇列裡只剩機器判不準的留言，
+         審核者第一個要知道的不是「這則有什麼旗標」，是「機器在擔心什麼」。 -->
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">送出時間</th><th scope="col">內容</th><th scope="col">標記</th><th scope="col">為什麼要你看</th><th scope="col">處理</th></tr>
+      </thead>
+      <tbody data-admin="queue"></tbody>
+    </table>
+    <p class="admin-empty" data-admin="empty">沒有等你看的留言。</p>
+  </section>
+
+  <section aria-labelledby="r-h">
+    <h2 id="r-h">已退回</h2>
+    <!-- ⛔ 退回不刪除（裁定 2026-08-17），而且要能還原：誤判會發生，
+         而被誤判的那個人不會知道要來申訴。 -->
+    <p class="admin-note">退回的留言沒有被刪掉。判斷錯了可以放回佇列重看。</p>
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">送出時間</th><th scope="col">內容</th><th scope="col">標記</th><th scope="col">為什麼被留下</th><th scope="col">處理</th></tr>
+      </thead>
+      <tbody data-admin="rejected"></tbody>
+    </table>
+    <p class="admin-empty" data-admin="rejected-empty">沒有退回過的留言。</p>
+  </section>
+
+  <section class="kw-section" aria-labelledby="k-h">
+    <h2 id="k-h">姓名遮蔽清單</h2>
+    <p class="admin-note" data-admin="kw-summary">—</p>
+    <p class="admin-note">校名（○○國中）、稱謂（○老師）與帳號（FB／IG／LINE、電話、信箱）都由規則自動遮蔽。
+      這裡補的是規則抓不到的特定姓名，一行一個。</p>
+    <form data-admin="kw-form">
+      <label for="kw-names">要遮蔽的姓名</label>
+      <textarea id="kw-names" data-admin="names" rows="6"></textarea>
+      <p><button type="submit">儲存</button></p>
+    </form>
+    <p class="notice" data-admin="kw-note" hidden></p>
+  </section>
+</main>
+
+<script src="content.js?v=0d4d26f8"></script>
+<script src="js/prefs.js?v=0d4d26f8"></script>
+<script src="js/schema.js?v=0d4d26f8"></script>
+<script src="js/keywords.js?v=0d4d26f8"></script>
+<script src="js/data-provider.js?v=0d4d26f8"></script>
+<script src="js/guard.js?v=0d4d26f8"></script>
+<script src="js/triage.js?v=0d4d26f8"></script>
+<script src="js/admin.js?v=0d4d26f8"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@
  *   getAlias()                      -> { name, hue }
  *   listApproved()                  -> Message[]
  *   listPending()                   -> Message[]      // 後台限定
+ *   listRejected()                  -> Message[]      // 後台限定，退回不刪除
  *   createMessage(draft)            -> Message        // 狀態由自動審核決定
  *   listMineIds()                   -> string[]       // 本機送出過的留言 id，永不上傳
  *   rememberMine(id)                -> true
@@ -222,6 +223,15 @@
         }));
       },
 
+      /* 退回的留言。⛔ 退回**不刪除**（裁定 2026-08-17）——後台要看得到、
+       * 也要能還原。誤判會發生，而被誤判的那個人不會知道要來申訴。 */
+      listRejected: function () {
+        var db = read();
+        return Promise.resolve(db.messages.filter(function (m) {
+          return m.status === S.STATUS.REJECTED;
+        }));
+      },
+
       createMessage: function (draft) {
         var db = read();
         var msg = S.makeMessage({
@@ -322,6 +332,7 @@
       },
       listApproved: function () { return req('GET', '/messages?status=approved'); },
       listPending:  function () { return req('GET', '/messages?status=pending'); },
+      listRejected: function () { return req('GET', '/messages?status=rejected'); },
       /* ⛔ 送出後把 id 記在**本機**。這個清單永不上傳（見 api-contract）：
        * 它只是為了讓本人在自己的裝置上找得到自己說過的話。
        * 換一台裝置就找不到，那是刻意的——那正是「沒有人知道你是誰」的代價，

@@ -2595,3 +2595,100 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
 .wall-pause:hover { background: var(--warm-soft); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--edge); }
 .wall-pause[data-state="paused"] { background: var(--warm); color: #fff; }
 @media (prefers-reduced-motion: reduce) { .wall-pause:hover { transform: none; } }
+
+/* ================================================================
+ * 後台（2026-08-31 補做）
+ * ⛔ 這一頁永遠不部署：build-site 排除它，G30 掃描會部署的檔案裡不得
+ *    出現任何後台路徑。它是給管理者在本機開的。
+ * 形狀語彙跟前台一致（粗框、硬邊投影），但沒有面板——後台不需要導覽，
+ * 它只有一件事要做：看這幾則、決定放不放。
+ * ================================================================ */
+body.admin {
+  --measure: 100ch;
+  padding: var(--sp-5) var(--gap) var(--sp-6);
+}
+.admin main { overflow-x: auto; }
+.admin-head { border-bottom: 2px solid var(--edge); padding-bottom: var(--sp-3); margin-bottom: var(--sp-4); }
+.admin-head h1 { font-size: var(--fs-1); font-weight: 800; margin: 0 0 var(--sp-1); }
+.admin-sub { margin: 0 0 var(--sp-1); font-size: var(--fs-3); }
+.admin-provider { margin: 0; font-size: var(--fs-4); color: var(--ink-soft); }
+
+/* 三個數字：一眼看出「有沒有事要做」 */
+.admin-stats { list-style: none; display: flex; flex-wrap: wrap; gap: var(--sp-3); margin: 0 0 var(--sp-5); padding: 0; }
+.admin-stat {
+  flex: 1 1 140px;
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--edge);
+  padding: var(--sp-3);
+  background: var(--card);
+}
+.admin-stat b { display: block; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.admin-stat span { font-size: var(--fs-4); color: var(--ink-soft); }
+.admin-stat--wait { background: var(--fill-a); }   /* 等你看＝要動作的那一格 */
+.admin-stat--live { background: var(--fill-b); }
+.admin-stat--back { background: var(--card); }
+.admin-stat--wait b, .admin-stat--live b { color: var(--edge); }
+.admin-stat--wait span, .admin-stat--live span { color: #4a3d2c; }
+
+.admin h2 { font-size: var(--fs-2); font-weight: 800; margin: var(--sp-5) 0 var(--sp-2); }
+.admin-note { margin: 0 0 var(--sp-2); font-size: var(--fs-4); color: var(--ink-soft); }
+.admin-empty {
+  margin: 0;
+  padding: var(--sp-4);
+  border: 2px dashed var(--edge);
+  border-radius: 12px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.queue { width: 100%; border-collapse: separate; border-spacing: 0; }
+.queue th, .queue td { padding: 10px 10px; text-align: left; vertical-align: top; }
+.queue th {
+  font-size: var(--fs-5); letter-spacing: 0.06em; font-weight: 700;
+  color: var(--ink); border-bottom: 2px solid var(--edge);
+}
+.queue td { border-bottom: 1px solid var(--line); }
+.queue .body-cell { white-space: pre-wrap; font-size: var(--fs-3); max-width: 42ch; }
+.queue td button {
+  border: 2px solid var(--edge); border-radius: var(--radius-pill);
+  background: var(--card); color: var(--ink);
+  font: inherit; font-size: var(--fs-5); font-weight: 700;
+  padding: 4px 12px; margin: 0 6px 6px 0; cursor: pointer;
+  box-shadow: 2px 2px 0 var(--edge);
+}
+.queue td button:hover { background: var(--warm-soft); }
+/* 「通過」是把話放上牆——這一頁最重的動作，給它實色 */
+.queue td button:first-child { background: var(--warm); color: #fff; }
+.queue td button:first-child:hover { background: var(--warm-text); }
+
+.kw-section { margin-top: var(--sp-6); border-top: 2px solid var(--edge); padding-top: var(--sp-4); }
+.kw-section textarea {
+  width: 100%; max-width: 46ch;
+  border: 2px solid var(--edge); border-radius: 11px;
+  padding: 10px 12px; font: inherit; font-size: var(--fs-4);
+  background: var(--card); color: var(--ink);
+}
+.kw-section label { display: block; font-size: var(--fs-4); font-weight: 700; margin-bottom: 4px; }
+.kw-section button {
+  border: 2px solid var(--edge); border-radius: 11px;
+  background: var(--card); color: var(--ink);
+  font: inherit; font-weight: 700; padding: 7px 16px; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.kw-section button:hover { background: var(--warm-soft); }
+
+/* 後台的範圍警語。⛔ 不可做得低調——它要擋住「這看起來像個真的管理台」
+   這個誤會，而那個誤會會讓人以為自己在審別人的留言。 */
+.admin-scope {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  background: var(--draft-bg);
+  color: var(--draft-ink);
+  font-size: var(--fs-4);
+  line-height: 1.6;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.admin-scope[data-state="server"] { background: var(--warm); color: #fff; }
