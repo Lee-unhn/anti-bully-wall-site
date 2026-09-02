@@ -275,26 +275,25 @@
   /* 軌道數不再受視窗高度限制——牆自己會上下捲（裁定 2026-08-24）。
    * 上限給 10 是效能與意義的取捨：60 則留言分到 10 軌，每軌 6 則，
    * 再多軌就會有整條軌長時間是空的。 */
-  /* 軌道數＝**看得到的那一帶塞得下幾條**，不是固定 10 條。
+  /* 軌道數＝**比可視帶多**，讓牆捲得動。
    *
-   * 2026-08-24 讓牆可以上下捲之後，這裡就寫死 10 軌。副作用是 60 則留言
-   * 散在 1180px 高的平面上，而可視帶只有 300px——任何時刻畫面上只有一兩張，
-   * 牆看起來是空的（Lee 2026-08-31：UIUX 太樸素，參考彈幕網站）。
-   * 彈幕的密度來自「同時看得到很多句」：軌道貼齊可視帶，全部 60 則就會
-   * 一起在這一帶裡流動。捲動保留給放不下的情況，不再是常態。
+   * 這個值改過兩次，兩次都改錯方向，記在這裡免得再來一次：
+   *   ・原本寫死 10 軌 → 牆捲得動，但可視帶只有 2 軌有東西（那是水平間距
+   *     的問題，不是軌道數的問題，我當時誤診了）。
+   *   ・2026-08-31 改成「剛好塞滿可視帶」→ 平面 510 舞台 472，**等於沒得捲**，
+   *     Lee 回報「彈幕不能往下滾動看起來很少」。
+   * 正解是兩件事一起：軌道多過可視帶（捲得動＝看起來很多），
+   * 而且同一軌的前後兩則要靠得近（見 spreadFactor）。
    *
-   * ⛔ 下限 3 條：再少就不像彈幕像跑馬燈。上限 10 條：再多的話每一軌
-   *    分到的留言太少，又會回到稀疏。 */
+   * ⛔ 下限取「塞滿可視帶所需的條數」：平面比舞台矮的話，底下會露出一整片
+   *    空牆（2026-08-31 實測 146px）。 */
   function desiredLanes() {
     var w = global.innerWidth || 1280;
-    /* ⛔ 量舞台**實際算完的高度**，不要用 availableHeight()：
-     * CSS 的 min-height 可能把舞台撐得比它高，兩者不一致時平面會比舞台矮，
-     * 底下就是一整片空牆（實測舞台 472、平面 326，下方 146px 全空）。 */
     var band = state.stage ? state.stage.getBoundingClientRect().height : 0;
     if (band < 120) band = availableHeight();
-    var fit = Math.floor((band - 6) / LANE_H);
-    if (w < 620) return Math.max(3, Math.min(6, fit));
-    return Math.max(3, Math.min(10, fit));
+    var fill = Math.ceil((band - 6) / LANE_H);      /* 不得少於這個，否則底部露空 */
+    var want = w < 620 ? 5 : 8;                     /* 想要的條數：捲得動才像「很多人說過」 */
+    return Math.max(3, fill, want);
   }
 
   function laneCount(size) {
@@ -332,11 +331,18 @@
 
   /* 留言少的時候拉開間距，而不是重複刷同幾則。
    * 重播同一句會讓這面牆看起來像在灌水；拉開間距至少是誠實的「現在就這麼多人說話」。 */
+  /* 同一軌相鄰兩則的間距倍率。
+   * ⛔ 1.0 代表 (卡寬 580 + 間隙 56) = 636px，而舞台只有約 900px 寬——
+   *    一條軌道上永遠只有一張多，這就是「彈幕看起來很少」的直接原因
+   *    （2026-08-31 實測：每軌 20 張鋪在 9700px 上，畫面內只有 2 張）。
+   * 0.72 讓相鄰兩則各露出大半、邊緣稍微交疊，畫面內每軌看得到 2-3 則。
+   * ⛔ 不要壓到 0.5 以下：留言是要被讀的，疊到看不見字就本末倒置了——
+   *    這一點跟影片彈幕不同，那裡的字疊掉了還有影片可以看。 */
   function spreadFactor(lanes) {
     var perLane = state.items.length / Math.max(1, lanes);
-    if (perLane < 1.5) return 2.2;
-    if (perLane < 3) return 1.5;
-    return 1.0;
+    if (perLane < 1.5) return 1.6;   /* 留言太少時反而要拉開，否則整團擠在左邊 */
+    if (perLane < 3) return 1.0;
+    return 0.72;
   }
 
   function seedPositions() {
@@ -722,6 +728,19 @@
     state.plane = document.createElement('div');
     state.plane.className = 'wall-plane';
     state.stage.appendChild(state.plane);
+
+    /* 上下淡出：牆比可視帶高，要讓人看得出「還有更多、可以往下捲」。
+     * ⛔ 掛在 .wall-frame 不是 .wall-stage——舞台是會捲的那一層，
+     *    掛上去會跟著內容捲走，只在最上面看得到。 */
+    var frame = state.stage.parentNode;
+    if (frame && frame.classList && frame.classList.contains('wall-frame')) {
+      ['t', 'b'].forEach(function (pos) {
+        var el = document.createElement('div');
+        el.className = 'wall-scroll-hint-' + pos;
+        el.setAttribute('aria-hidden', 'true');
+        frame.appendChild(el);
+      });
+    }
 
     var mq = global.matchMedia('(prefers-reduced-motion: reduce)');
     /* ?motion=force：驗收用的測試鉤子，強制走彈幕主路徑。

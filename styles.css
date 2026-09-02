@@ -2499,3 +2499,29 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
   .msg-card:hover, .triage-item:hover, .msg-reaction:hover,
   .wall-toolbar button:hover { transform: none; }
 }
+
+/* ---- 牆捲得動要看得出來（2026-08-31）----
+ * Lee：彈幕不能往下滾動看起來很少。軌道多過可視帶之後牆是捲得動的，
+ * 但沒有任何提示的話沒有人會去捲——功能等於不存在。
+ * ⛔ 淡出掛在 .wall-frame（不捲）而不是 .wall-stage（會捲），
+ *    否則它會跟著內容一起捲走，只在最上面看得到。
+ */
+.wall-frame { --edge-fade: 34px; }
+.wall-frame::before,
+.wall-frame::after { z-index: 3; }
+/* 上下兩道淡出：告訴人「這一帶還有上下文」 */
+.wall-frame .wall-scroll-hint-t,
+.wall-frame .wall-scroll-hint-b {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: var(--edge-fade);
+  pointer-events: none;
+  z-index: 4;
+}
+.wall-frame .wall-scroll-hint-t { top: 0;    background: linear-gradient(180deg, var(--stage), var(--stage-0)); }
+.wall-frame .wall-scroll-hint-b { bottom: 0; background: linear-gradient(0deg,   var(--stage), var(--stage-0)); }
+
+/* 捲軸本身也留著——它是最直接的「還有更多」訊號。
+   ⛔ 不要 scrollbar-width: none：那等於把唯一的提示藏起來。 */
+.wall-stage[data-mode="danmaku"] { scrollbar-width: thin; scrollbar-color: var(--edge-soft) transparent; }
