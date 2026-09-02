@@ -2593,5 +2593,5 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
   transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
 }
 .wall-pause:hover { background: var(--warm-soft); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--edge); }
-.wall-pause[aria-pressed="true"] { background: var(--warm); color: #fff; }
+.wall-pause[data-state="paused"] { background: var(--warm); color: #fff; }
 @media (prefers-reduced-motion: reduce) { .wall-pause:hover { transform: none; } }

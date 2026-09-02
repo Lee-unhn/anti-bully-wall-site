@@ -852,10 +852,14 @@
       pause.type = 'button';
       pause.className = 'wall-pause';
       pause.setAttribute('data-wall-pause', '');
-      pause.setAttribute('aria-pressed', 'false');
+      /* 標籤寫的是**按下去會發生什麼**，不是現在的狀態：
+       * 流動中 → 顯示「暫停」；已暫停 → 顯示「流動」。
+       * ⛔ 因此不用 aria-pressed：那個屬性表示「這顆是不是被按著」，
+       *    跟一顆標籤會變成動作名稱的鈕擺在一起會互相矛盾
+       *    （報讀器會唸成「暫停，未按下」）。狀態改用 data-state 供 CSS 用。 */
       var label = function () {
-        pause.textContent = state.paused ? '繼續流動' : '暫停';
-        pause.setAttribute('aria-pressed', state.paused ? 'true' : 'false');
+        pause.textContent = state.paused ? '流動' : '暫停';
+        pause.setAttribute('data-state', state.paused ? 'paused' : 'flowing');
       };
       label();
       pause.addEventListener('click', function () {
