@@ -2574,3 +2574,24 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
 @media (prefers-reduced-motion: reduce) {
   .page-back a:hover, .page-back a:active { transform: none; }
 }
+
+/* ---- 暫停鍵（WCAG 2.2.2）----
+ * ⛔ 不可拿掉：自動開始、持續超過 5 秒的捲動內容必須可以暫停。
+ * 一顆就夠，不必回到 2026-08-31 之前那三顆。 */
+.wall-pause {
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-pill);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-5);
+  font-weight: 700;
+  padding: 4px 13px;
+  margin-right: var(--sp-2);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--edge);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+.wall-pause:hover { background: var(--warm-soft); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--edge); }
+.wall-pause[aria-pressed="true"] { background: var(--warm); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .wall-pause:hover { transform: none; } }

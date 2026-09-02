@@ -42,6 +42,9 @@
     /* 這台裝置送出過的留言 id（物件當 set 用）。⛔ 只用來標「你說的」，
      * 永不上傳——見 data-provider 的 listMineIds 註解。 */
     mineIds: null,
+    /* 系統要求減少動態：慢速、不上下飄，但仍然流動 */
+    gentle: false,
+    paused: false,
           /* 本機代號，用來標出「這是你說的」 */
     stage: null,
     plane: null,
@@ -331,8 +334,14 @@
 
   function laneY(lane) { return lane * LANE_H + 6; }
 
+  /* gentle＝系統要求減少動態的人。⛔ 處理方式是「把動態減弱」不是「把內容拿掉」：
+   * 這面牆流動的字就是內容本身，整個停掉等於那些人拿到一個不一樣的網站。
+   * 慢到 45%、完全不上下飄，再加上一顆隨時可按的暫停鍵（WCAG 2.2.2）。 */
+  function speedScale() { return state.gentle ? 0.45 : 1; }
+  function driftAmp()   { return state.gentle ? 0 : DRIFT_AMP; }
+
   function randSpeed() {
-    return -(DAN_SPEED_MIN + Math.random() * (DAN_SPEED_MAX - DAN_SPEED_MIN));
+    return -(DAN_SPEED_MIN + Math.random() * (DAN_SPEED_MAX - DAN_SPEED_MIN)) * speedScale();
   }
 
   /* 留言少的時候拉開間距，而不是重複刷同幾則。
@@ -444,7 +453,7 @@
       if (it.x < -(CARD_W + 12)) recycle(it, size);
       /* 上下飄移只改繪製時的 y，不改 it.y（軌道基準）——
        * 否則誤差會累積，卡片會慢慢漂出自己的軌道。 */
-      var dy = Math.sin(ts / 1000 * it.fq * Math.PI * 2 + it.ph) * DRIFT_AMP;
+      var dy = Math.sin(ts / 1000 * it.fq * Math.PI * 2 + it.ph) * driftAmp();
       it.el.style.transform = 'translate3d(' + Math.round(it.x) + 'px,' + Math.round(it.y + dy) + 'px,0)';
     }
 
@@ -761,11 +770,17 @@
      * 把彈幕位移整個蓋掉，主路徑仍然驗不到。掛一個 class 讓 styles.css 用更高的
      * 選擇器權重把那幾條讓開（見 styles.css 的 .force-motion 區塊）。 */
     if (forceMotion) document.documentElement.classList.add('force-motion');
-    state.reduced = mq.matches && !forceMotion;
+    /* ⛔ 2026-08-31 改：reduced-motion 不再等於「靜態」。
+     * 原本它直接進 board 模式，結果開了這個設定的人（Lee 就是）拿到的是
+     * 一面不會動的牆，而牆會動正是這個網站的樣子。
+     * 現在它等於 gentle：一樣流動，但慢 55%、不上下飄。 */
+    state.gentle = mq.matches && !forceMotion;
+    state.reduced = false;
     if (mq.addEventListener) {
       mq.addEventListener('change', function (e) {
-        state.reduced = e.matches;
-        if (state.reduced) { stopFloat(); setMode('board'); }
+        state.gentle = e.matches;
+        /* 設定當場改變時重新鋪一次，速度與飄移才會跟著換 */
+        if (state.mode === 'danmaku') { seedPositions(); paint(); }
       });
     }
 
@@ -825,6 +840,41 @@
      * 不再是使用者可選項——也因此不再需要「使用者上次選了什麼」這件事。
      * ⛔ setMode() 與 board 版面沒有刪：它們仍然是 reduced-motion 的落點。 */
 
+    /* ---- 暫停鍵 ----
+     * ⛔ 這一顆不可以拿掉。WCAG 2.2.2：自動開始、持續超過 5 秒、又跟其他內容
+     *    並置的捲動資訊，必須提供暫停／停止的方法。2026-08-31 拿掉整條工具列時
+     *    連這個能力一起拿掉了（原本是「全部攤開」在兼任），那是退步不是簡化。
+     * ⛔ 也不要改成只在 reduced-motion 時出現：需要它的不只那群人。
+     * 一顆就夠，不必回到三顆。 */
+    var bar = document.querySelector('.wall-toolbar');
+    if (bar) {
+      var pause = document.createElement('button');
+      pause.type = 'button';
+      pause.className = 'wall-pause';
+      pause.setAttribute('data-wall-pause', '');
+      pause.setAttribute('aria-pressed', 'false');
+      var label = function () {
+        pause.textContent = state.paused ? '繼續流動' : '暫停';
+        pause.setAttribute('aria-pressed', state.paused ? 'true' : 'false');
+      };
+      label();
+      pause.addEventListener('click', function () {
+        state.paused = !state.paused;
+        if (state.paused) {
+          stopFloat();
+          setMode('board');
+          document.documentElement.classList.remove('force-motion');
+        } else {
+          document.documentElement.classList.add('force-motion');
+          state.mode = 'danmaku';
+          seedPositions();
+          setMode('danmaku');
+        }
+        label();
+      });
+      bar.insertBefore(pause, bar.firstChild);
+    }
+
     bindBoardEvents();
     bindHelpDialog();
     bindCompose();
@@ -860,7 +910,11 @@
          * ⛔ 也不再有「使用者上次選了什麼」：切換鈕 2026-08-31 已移除，
          *    留著讀舊偏好的話，以前按過「全部攤開」的人會永遠看到靜態牆，
          *    而且再也沒有按鈕可以切回來。 */
-        setMode(state.reduced ? 'board' : 'danmaku');
+        /* ⛔ 一律流動。減少動態的人拿到的是 gentle 版，不是靜止版。
+         * 靜止仍然到得了——那是暫停鍵（WCAG 2.2.2 要求：自動開始、
+         * 持續超過 5 秒的捲動內容必須可以暫停）。 */
+        document.documentElement.classList.add('force-motion');
+        setMode('danmaku');
         return maybeMountFpsBadge().then(function () { return list.length; });
       })
       .catch(function (err) {
