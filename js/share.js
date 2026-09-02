@@ -21,11 +21,18 @@
   /* 送出後的留言要進待審佇列才會上牆，但「找不到自己剛剛說的話」會讓人
    * 以為送丟了。所以這裡把待審的也列出來、標成檢視中——
    * ⛔ 只是列給本人看，不代表它已經在牆上（牆仍然只顯示 approved）。 */
+  /* ⛔ 用「本機送出過的 id 清單」認，不再比對代號。
+   *    代號 2026-08-31 起每次進站重擲（Lee），比對代號會讓人在重新整理
+   *    之後就找不到自己說過的話——而這一頁存在的唯一理由就是讓他找得到。
+   *    id 清單只存在這台裝置、永不上傳；換裝置就找不到，那是匿名的代價
+   *    也是它的保證。 */
   function myMessages() {
-    return ABW.provider.getAlias().then(function (alias) {
+    return ABW.provider.listMineIds().then(function (ids) {
+      var mineSet = {};
+      ids.forEach(function (id) { mineSet[id] = true; });
       var mine = function (list) {
         return list.filter(function (m) {
-          return m.source === S.SOURCE.VISITOR && m.alias && m.alias.name === alias.name;
+          return m.source === S.SOURCE.VISITOR && mineSet[m.id] === true;
         });
       };
       return Promise.all([ABW.provider.listApproved(), ABW.provider.listPending()])
@@ -49,7 +56,7 @@
       if (note) note.hidden = list.length === 0;
       host.innerHTML = '';
 
-      return ABW.provider.getAlias().then(function (alias) {
+      return Promise.resolve().then(function () {
         list.forEach(function (entry) {
           var msg = entry.msg;
           var li = document.createElement('li');

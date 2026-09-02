@@ -39,6 +39,9 @@
     items: [],            /* { msg, el, x, y, vx, lane, paused, countEls } */
     lanes: 1,
     myAlias: null,
+    /* 這台裝置送出過的留言 id（物件當 set 用）。⛔ 只用來標「你說的」，
+     * 永不上傳——見 data-provider 的 listMineIds 註解。 */
+    mineIds: null,
     savedMode: null,       /* 使用者上次明確選過的檢視模式 */          /* 本機代號，用來標出「這是你說的」 */
     stage: null,
     plane: null,
@@ -86,7 +89,11 @@
       var nm = document.createElement('span');
       nm.textContent = msg.alias.name;
       who.appendChild(nm);
-      if (state.myAlias && msg.alias.name === state.myAlias) {
+      /* ⛔ 用 id 認不用代號認。代號 2026-08-31 起每次進站重擲，比對代號
+       * 會誤標：這一次隨機到的名字剛好跟某一則種子或別人的留言同名時，
+       * 那則就會被標成「你說的」——在一個匿名站裡把別人的話說成你的，
+       * 比漏標嚴重得多。 */
+      if (state.mineIds && state.mineIds[msg.id]) {
         card.classList.add('is-mine');
         var mine = document.createElement('span');
         mine.className = 'who-mine';
@@ -628,6 +635,11 @@
           field.value = '';
           if (counter) counter.textContent = '0 / ' + max;
           var approved = msg.status === S.STATUS.APPROVED;
+          /* ⛔ 開機時載入過一次就不會再更新——不補這一行的話，剛送出的
+           * 留言上牆之後不會被標「你說的」，他會在牆上看到自己的話卻
+           * 認不出那是自己的（2026-08-31 實測）。 */
+          if (!state.mineIds) state.mineIds = {};
+          state.mineIds[msg.id] = true;
           if (notice) {
             /* 本機資料層＝沒有人收得到。這時候不能沿用「會出現在牆上」那句。 */
             var w = ABW.content.wall;
@@ -786,6 +798,11 @@
 
     return ABW.provider.getAlias()
       .then(function (alias) { state.myAlias = alias && alias.name; })
+      .then(function () { return ABW.provider.listMineIds(); })
+      .then(function (ids) {
+        state.mineIds = {};
+        ids.forEach(function (id) { state.mineIds[id] = true; });
+      })
       .then(function () {
         return ABW.provider.getViewMode ? ABW.provider.getViewMode() : null;
       })
@@ -796,13 +813,16 @@
         render(list);
         var status = document.querySelector('[data-c="wall.status"]');
         if (status) {
+          /* ⛔ 這一行是鼓勵不是系統狀態（裁定 2026-08-31）。句數已經在首屏
+           * 的大標裡說過一次，這裡不必再報一次數字。 */
+          var lines = ABW.content.wall.statusLines || [];
           var base = list.length
-            ? (list.length + ' 則留言在牆上')
+            ? (lines.length ? lines[Math.floor(Math.random() * lines.length)] : '')
             : ABW.content.wall.emptyNotice;
-          /* reduce 開著的人預設看到靜態牆——要告訴他這是設定造成的、而且可以自己打開，
-           * 否則他只會以為牆壞了（Lee 2026-08-20 就是這樣回報的）。 */
-          status.textContent = state.reduced
-            ? base + '。你的系統設為減少動態，按「流動」可以讓它動起來'
+          /* reduce 開著的人預設看到靜態牆——要告訴他可以自己打開，否則
+           * 他只會以為牆壞了（Lee 2026-08-20 就是這樣回報的）。附註，不是主詞。 */
+          status.textContent = state.reduced && ABW.content.wall.statusMotionHint
+            ? base + '　' + ABW.content.wall.statusMotionHint
             : base;
         }
         /* reduced-motion 使用者直接進靜態的畫布模式，不做漂浮 */

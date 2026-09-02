@@ -14,7 +14,9 @@
  *   getAlias()                      -> { name, hue }
  *   listApproved()                  -> Message[]
  *   listPending()                   -> Message[]      // 後台限定
- *   createMessage(draft)            -> Message        // 一律以 pending 建立
+ *   createMessage(draft)            -> Message        // 狀態由自動審核決定
+ *   listMineIds()                   -> string[]       // 本機送出過的留言 id，永不上傳
+ *   rememberMine(id)                -> true
  *   setStatus(id, status)           -> Message        // 後台限定
  *   react(id, reactionId)           -> Message
  *   getViewMode() / setViewMode(mode) -> 'danmaku' | 'board' | null  // 本機偏好
@@ -29,10 +31,20 @@
 
   var STORE_KEY = 'abw.v1';
   /* 16 × 16 = 256 種組合。原本 8 × 8 只有 64 種，60 則種子會大量撞名。 */
+  /* 代號每次進站重擲（裁定 2026-08-31，Lee），所以組合數要夠大，
+   * 否則同一個人連開幾次就會撞到同一個名字，「隨機」看起來像壞掉。
+   * 30 x 30 = 900 組。 */
+  /* 這一次造訪用的代號。⛔ 只活在記憶體裡，重新整理就換一個。 */
+  var sessionAlias = null;
+
   var ALIAS_ADJ = ['安靜的', '晴天的', '海邊的', '深夜的', '溫吞的', '早起的', '走遠的', '躲雨的',
-                   '慢慢的', '靠窗的', '轉學的', '愛睡的', '半路的', '收傘的', '沉默的', '遲到的'];
+                   '慢慢的', '靠窗的', '轉學的', '愛睡的', '半路的', '收傘的', '沉默的', '遲到的',
+                   '看雲的', '繞路的', '折返的', '低頭的', '數星星的', '忘記帶傘的', '坐後排的',
+                   '換座位的', '提早到的', '留到最後的', '不說話的', '愛下雨的', '揹書包的', '走樓梯的'];
   var ALIAS_NOUN = ['貓', '燈', '船', '風', '石頭', '橘子', '毛衣', '窗',
-                    '書包', '影子', '腳踏車', '海', '鉛筆', '鑰匙', '傘', '月台'];
+                    '書包', '影子', '腳踏車', '海', '鉛筆', '鑰匙', '傘', '月台',
+                    '毛巾', '課本', '公車', '操場', '走廊', '樓梯', '便當', '水壺',
+                    '橡皮擦', '外套', '球鞋', '路燈', '午後', '長椅'];
 
   /* 種子的代號由留言內容決定，不隨機——重建、換裝置都是同一個名字。
    * ⛔ 這不是「假裝有真人」：資料層仍記著 source='sample'，而且只要還有
@@ -157,13 +169,38 @@
         return Promise.resolve({ added: added, removed: removed });
       },
 
+      /* ⛔ 代號**每次進站重擲**，不再存起來（裁定 2026-08-31，Lee：
+       *    每次登入都要換一個排列組合）。存起來等於在這台裝置上建立一個
+       *    穩定的化名，久了就是一個可以被認出來的身分——這個站承諾的是
+       *    「沒有人知道你是誰」，包括不知道「又是上次那個人」。
+       *
+       * ⛔ 這也是為什麼「我說過的話」不能再用代號比對：代號一換就認不出
+       *    自己以前說的話。改用 mineIds（本機留言 id 清單，永不上傳）。
+       *    整支 session 內用同一個代號，所以同一次造訪送出的多則留言
+       *    名字仍然一致。 */
       getAlias: function () {
-        var db = read();
-        if (!db.alias) {
-          db.alias = { name: pick(ALIAS_ADJ) + pick(ALIAS_NOUN), hue: Math.floor(Math.random() * 360) };
-          write(db);
+        if (!sessionAlias) {
+          sessionAlias = {
+            name: pick(ALIAS_ADJ) + pick(ALIAS_NOUN),
+            hue: Math.floor(Math.random() * 360)
+          };
         }
-        return Promise.resolve(db.alias);
+        return Promise.resolve(sessionAlias);
+      },
+
+      /* ---- 「這台裝置送出過哪幾則」----
+       * ⛔ 只存 id，而且**永不上傳**（見 docs/api-contract.md）。
+       *    不要改成在留言上加一個裝置欄位：那會讓後台可以把同一個人的
+       *    多則留言串起來，等於在匿名站裡建立作者身分。 */
+      rememberMine: function (id) {
+        var db = read();
+        db.mineIds = db.mineIds || [];
+        if (db.mineIds.indexOf(id) === -1) { db.mineIds.push(id); write(db); }
+        return Promise.resolve(true);
+      },
+      listMineIds: function () {
+        var db = read();
+        return Promise.resolve((db.mineIds || []).slice());
       },
 
       listApproved: function () {
@@ -198,6 +235,8 @@
           createdAt: nowIso()
         });
         db.messages.push(msg);
+        db.mineIds = db.mineIds || [];
+        db.mineIds.push(msg.id);
         write(db);
         return Promise.resolve(msg);
       },
@@ -278,7 +317,17 @@
       },
       listApproved: function () { return req('GET', '/messages?status=approved'); },
       listPending:  function () { return req('GET', '/messages?status=pending'); },
-      createMessage: function (draft) { return req('POST', '/messages', draft); },
+      /* ⛔ 送出後把 id 記在**本機**。這個清單永不上傳（見 api-contract）：
+       * 它只是為了讓本人在自己的裝置上找得到自己說過的話。
+       * 換一台裝置就找不到，那是刻意的——那正是「沒有人知道你是誰」的代價，
+       * 也是它的保證。 */
+      createMessage: function (draft) {
+        return req('POST', '/messages', draft).then(function (msg) {
+          return LocalProvider.rememberMine(msg.id).then(function () { return msg; });
+        });
+      },
+      rememberMine: function (id) { return LocalProvider.rememberMine(id); },
+      listMineIds: function () { return LocalProvider.listMineIds(); },
       setStatus: function (id, status) { return req('PATCH', '/messages/' + id, { status: status }); },
       react: function (id, reactionId) {
         if (!S.isReactionId(reactionId)) {
