@@ -287,13 +287,19 @@
    *
    * ⛔ 下限取「塞滿可視帶所需的條數」：平面比舞台矮的話，底下會露出一整片
    *    空牆（2026-08-31 實測 146px）。 */
+  var LANES_MAX = 12;
+
   function desiredLanes() {
     var w = global.innerWidth || 1280;
+    /* ⛔ 量到的高度必須夾住。舞台是可捲的容器，某些時序下量到的是**內容高度**
+     * 而不是可視高度，於是「高度→軌道數→平面更高→高度更大」形成回授，
+     * 平面一路長到 10318px（2026-08-31 線上實測，應為 1350）。
+     * ResizeObserver 的 24px 門檻擋不住它——每一輪的變化都遠大於 24px。 */
     var band = state.stage ? state.stage.getBoundingClientRect().height : 0;
-    if (band < 120) band = availableHeight();
+    if (band < 120 || band > 2000) band = availableHeight();
     var fill = Math.ceil((band - 6) / LANE_H);      /* 不得少於這個，否則底部露空 */
     var want = w < 620 ? 5 : 8;                     /* 想要的條數：捲得動才像「很多人說過」 */
-    return Math.max(3, fill, want);
+    return Math.min(LANES_MAX, Math.max(3, fill, want));
   }
 
   function laneCount(size) {
@@ -332,6 +338,9 @@
   /* 留言少的時候拉開間距，而不是重複刷同幾則。
    * 重播同一句會讓這面牆看起來像在灌水；拉開間距至少是誠實的「現在就這麼多人說話」。 */
   /* 同一軌相鄰兩則的間距倍率。
+   * 2026-08-31 Lee：一段時間被蓋掉也沒關係，滑鼠移上去會自動變成最上層就好。
+   * 有了 hover 置頂這條保證，交疊就從缺點變成密度的手段——所以這裡壓得比
+   * 原本更近（0.72 → 0.58）。
    * ⛔ 1.0 代表 (卡寬 580 + 間隙 56) = 636px，而舞台只有約 900px 寬——
    *    一條軌道上永遠只有一張多，這就是「彈幕看起來很少」的直接原因
    *    （2026-08-31 實測：每軌 20 張鋪在 9700px 上，畫面內只有 2 張）。
@@ -341,8 +350,8 @@
   function spreadFactor(lanes) {
     var perLane = state.items.length / Math.max(1, lanes);
     if (perLane < 1.5) return 1.6;   /* 留言太少時反而要拉開，否則整團擠在左邊 */
-    if (perLane < 3) return 1.0;
-    return 0.72;
+    if (perLane < 3) return 0.9;
+    return 0.58;
   }
 
   function seedPositions() {

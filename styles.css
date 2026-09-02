@@ -2525,3 +2525,14 @@ body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
 /* 捲軸本身也留著——它是最直接的「還有更多」訊號。
    ⛔ 不要 scrollbar-width: none：那等於把唯一的提示藏起來。 */
 .wall-stage[data-mode="danmaku"] { scrollbar-width: thin; scrollbar-color: var(--edge-soft) transparent; }
+
+/* ---- 被蓋掉沒關係，滑鼠移上去浮到最上層（裁定 2026-08-31，Lee）----
+ * 有了這條保證，交疊就從缺點變成密度的手段：留言可以排得更近，
+ * 想讀哪一則就把游標移過去。
+ * ⛔ 要同時吃 :focus-within——鍵盤使用者也要能把一則叫到最上層，
+ *    否則被蓋住的那幾則對他們等於不存在。
+ * ⛔ z-index 要低於淡出層（z-index:4）以外的東西？不：卡片浮起來時
+ *    本來就該蓋過淡出，所以給 6。 */
+.msg-card { z-index: 1; }
+.msg-card:hover,
+.msg-card:focus-within { z-index: 6; }
