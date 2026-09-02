@@ -338,7 +338,12 @@
    * 這面牆流動的字就是內容本身，整個停掉等於那些人拿到一個不一樣的網站。
    * 慢到 45%、完全不上下飄，再加上一顆隨時可按的暫停鍵（WCAG 2.2.2）。 */
   function speedScale() { return state.gentle ? 0.45 : 1; }
-  function driftAmp()   { return state.gentle ? 0 : DRIFT_AMP; }
+  /* ⛔ gentle 是「減弱」不是「關掉」——這一條 2026-08-31 先做成 0，
+   * Lee 回報「上下小飄動怎麼不見了」。飄移是這面牆的質感之一（每則各自
+   * 隨機相位，看起來像貼在牆上被風吹），整個拿掉等於開了減少動態的人
+   * 拿到一面不一樣的牆。3px 搭配 45% 速度，整體動態仍遠低於一般版。 */
+  var DRIFT_AMP_GENTLE = 3;
+  function driftAmp()   { return state.gentle ? DRIFT_AMP_GENTLE : DRIFT_AMP; }
 
   function randSpeed() {
     return -(DAN_SPEED_MIN + Math.random() * (DAN_SPEED_MAX - DAN_SPEED_MIN)) * speedScale();
