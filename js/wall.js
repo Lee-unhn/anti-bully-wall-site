@@ -252,21 +252,42 @@
    *    現在的規則：牆的高度＝扣掉吸頂工具列與吸底輸入列之後剩下的可視高度，
    *    軌道數＝那個高度塞得下幾軌。想要更多軌，只能讓卡片變矮（那是取捨，不是 bug）。
    */
+  /* 看得到的那一帶有多高。
+   * ⛔ 用舞台自己的 top 量，不要把「工具列＋輸入列」加一加就當成佔用高度——
+   *    那樣算不到 hero（句數、分流三卡、代號行），實測差 290px：
+   *    回傳 593 而舞台其實只有 300，軌道數因此照著一個不存在的高度算，
+   *    平面比可視帶高一倍，60 則留言有一半在看不到的地方（2026-08-31）。 */
   function availableHeight() {
     var vh = global.innerHeight || 720;
-    var tb = document.querySelector('.wall-toolbar');
+    var top = state.stage ? state.stage.getBoundingClientRect().top : 180;
     var cb = document.querySelector('.composer-bar');
-    var used = (tb ? tb.offsetHeight : 54) + (cb ? cb.offsetHeight : 88) + 16;
+    var used = top + (cb ? cb.offsetHeight : 88) + 16;
     return Math.max(260, vh - used);
   }
 
   /* 軌道數不再受視窗高度限制——牆自己會上下捲（裁定 2026-08-24）。
    * 上限給 10 是效能與意義的取捨：60 則留言分到 10 軌，每軌 6 則，
    * 再多軌就會有整條軌長時間是空的。 */
+  /* 軌道數＝**看得到的那一帶塞得下幾條**，不是固定 10 條。
+   *
+   * 2026-08-24 讓牆可以上下捲之後，這裡就寫死 10 軌。副作用是 60 則留言
+   * 散在 1180px 高的平面上，而可視帶只有 300px——任何時刻畫面上只有一兩張，
+   * 牆看起來是空的（Lee 2026-08-31：UIUX 太樸素，參考彈幕網站）。
+   * 彈幕的密度來自「同時看得到很多句」：軌道貼齊可視帶，全部 60 則就會
+   * 一起在這一帶裡流動。捲動保留給放不下的情況，不再是常態。
+   *
+   * ⛔ 下限 3 條：再少就不像彈幕像跑馬燈。上限 10 條：再多的話每一軌
+   *    分到的留言太少，又會回到稀疏。 */
   function desiredLanes() {
     var w = global.innerWidth || 1280;
-    if (w < 620) return 6;
-    return 10;
+    /* ⛔ 量舞台**實際算完的高度**，不要用 availableHeight()：
+     * CSS 的 min-height 可能把舞台撐得比它高，兩者不一致時平面會比舞台矮，
+     * 底下就是一整片空牆（實測舞台 472、平面 326，下方 146px 全空）。 */
+    var band = state.stage ? state.stage.getBoundingClientRect().height : 0;
+    if (band < 120) band = availableHeight();
+    var fit = Math.floor((band - 6) / LANE_H);
+    if (w < 620) return Math.max(3, Math.min(6, fit));
+    return Math.max(3, Math.min(10, fit));
   }
 
   function laneCount(size) {

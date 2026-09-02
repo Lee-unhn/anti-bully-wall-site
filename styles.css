@@ -2131,3 +2131,371 @@ html[data-fs="lg"] { font-size: 20px; }
   /* 站名讓出來之後，句數就是首屏的第一句話——它本來就是這一頁的論述 */
   body.shell-layout .site-mark > .wall-scale { margin-top: 0; }
 }
+
+/* ================================================================
+ * 視覺加強（2026-08-31）
+ * Lee：UIUX 太樸素；參考彈幕網站如 nicovideo.jp。
+ *
+ * 上一輪為了「沉靜」把對比與材質一路壓低，結果壓過頭：畫面上沒有東西。
+ * 這一節把份量加回來，但加在**材質與層次**上，不是加在顏色數量上——
+ * 全站色票一個都沒有新增。
+ *
+ * 借自彈幕站的是「密度與生氣」，不是它們的深色。深色版 Lee 已否決三次
+ * （2026-08-20），這裡維持日光下的暖牆。
+ * ================================================================ */
+
+:root {
+  /* ⛔ 原本 0.042／0.16——磚縫其實畫了，只是淡到看不見，牆因此讀不出是牆。
+   * 這是「樸素」最大的單一原因：材質做了等於沒做。 */
+  --stage-seam:  rgba(87, 82, 121, 0.115);
+  --stage-mortar: rgba(255, 251, 245, 0.72);
+  --stage-glow:  rgba(234, 157, 52, 0.26);
+}
+
+/* ---- 牆真的長得像牆 ----
+ * 四層疊起來：上方光源 → 磚面高光 → 橫向磚縫 → 直向磚縫。
+ * 磚縫用「暗線＋下方一條亮線」兩條，磚才會有厚度；只有暗線是格線不是磚。 */
+.wall-stage {
+  background-image:
+    radial-gradient(130% 88% at 50% -14%, rgba(255, 252, 246, 0.85), transparent 58%),
+    radial-gradient(150% 96% at 50% 116%, var(--stage-glow), transparent 62%),
+    repeating-linear-gradient(180deg,
+      var(--stage-seam) 0 1px,
+      var(--stage-mortar) 1px 3px,
+      transparent 3px 46px),
+    repeating-linear-gradient(90deg,
+      var(--stage-seam) 0 1px,
+      var(--stage-mortar) 1px 2px,
+      transparent 2px 118px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 250, 243, 0.9),
+    inset 0 32px 52px -40px rgba(60, 44, 30, 0.55),
+    inset 0 -52px 74px -58px rgba(60, 44, 30, 0.5);
+}
+
+/* ---- 留言＝貼在牆上的紙，不是介面方框 ----
+ * ⛔ 拿掉四邊框線：有框就讀成 UI 元件，沒框才讀成一張紙。
+ *    左緣狀態豎線保留——那是「還沒有人回應／已經有人回應」的語彙（裁定 2026-08-20）。
+ * 影子分兩層：貼著紙的接觸陰影 ＋ 擴散的環境陰影。只有一層的話紙是浮的不是貼的。 */
+.msg-card {
+  border: 0;
+  border-left: 4px solid var(--rule-waiting);
+  border-radius: 1px 3px 3px 1px;
+  background-image: linear-gradient(177deg, #fffdf8 0%, var(--msg-paper) 46%, #fdf4e8 100%);
+  box-shadow:
+    0 1px 1px rgba(74, 58, 44, 0.16),
+    0 6px 14px -8px rgba(74, 58, 44, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+/* 膠帶。⛔ 純裝飾，所以不進無障礙樹也不影響版面（absolute）。 */
+.msg-card::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 26px;
+  width: 46px;
+  height: 15px;
+  transform: rotate(-2.4deg);
+  background: linear-gradient(160deg, rgba(255, 248, 232, 0.86), rgba(247, 220, 174, 0.72));
+  box-shadow: 0 1px 2px rgba(74, 58, 44, 0.16);
+  pointer-events: none;
+}
+.msg-card:hover {
+  box-shadow:
+    0 2px 3px rgba(74, 58, 44, 0.20),
+    0 16px 30px -14px rgba(74, 58, 44, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* 留言本體才是主角。上一版它跟代號、溫暖行、五顆鈕同一個份量。 */
+.msg-body {
+  font-size: 1.08em;
+  line-height: 1.66;
+  letter-spacing: 0.008em;
+  color: var(--ink);
+}
+
+/* ---- 鼓勵鈕：小一點、暖一點、按得動 ----
+ * ⛔ 字樣一律保留可見（裁定 2026-08-18，G18 在守）。這裡只動尺寸與質感。 */
+.msg-reaction {
+  padding: 4px 10px;
+  font-size: 0.8em;
+  border-radius: var(--radius-pill);
+  background: var(--warm-wash);
+  border-color: rgba(156, 92, 8, 0.30);
+  transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+.msg-reaction:hover {
+  background: var(--warm-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px -2px rgba(74, 58, 44, 0.35);
+}
+
+/* ---- 首屏的句數是這一頁的論述，給它標題的份量 ---- */
+body.shell-layout .site-mark > .wall-scale {
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+body.shell-layout .site-mark > .wall-scale strong {
+  font-size: 1.7em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: var(--warm-text);
+}
+
+/* ---- 面板識別帶：加一點厚度，不加一種顏色 ---- */
+.shell-brand {
+  background-image: linear-gradient(168deg, #5b4836 0%, var(--band) 52%, #3f3125 100%);
+  box-shadow: inset 0 -1px 0 rgba(255, 246, 233, 0.16), 0 1px 3px rgba(74, 58, 44, 0.28);
+}
+
+/* ---- 分流三卡：讓它們有厚度 ---- */
+.triage-item {
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px rgba(74, 58, 44, 0.10);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.triage-item:hover { transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* 靜態退路：位移類的轉場一律讓開，質感（陰影、材質）保留——
+     那些不是動態，拿掉只會讓畫面回到樸素。 */
+  .msg-reaction:hover,
+  .triage-item:hover { transform: none; }
+}
+
+/* ---- 牆面修正：橫縫＋斑駁，不要直縫 ----
+ * ⛔ 直縫與橫縫都畫的話會變成方格紙：repeating-linear-gradient 沒辦法讓
+ *    相鄰兩層磚錯開（running bond），對齊的直縫讀起來就是格線不是磚。
+ *    只留橫縫＋不規則斑駁，讀起來是抹平的牆面，比假磚誠實也好看。
+ */
+.wall-stage {
+  background-image:
+    /* 上方光源 */
+    radial-gradient(128% 84% at 50% -16%, rgba(255, 253, 249, 0.9), transparent 56%),
+    /* 底部暖光 */
+    radial-gradient(150% 96% at 50% 118%, var(--stage-glow), transparent 60%),
+    /* 斑駁：三顆大範圍、低對比的暈，讓牆面不是一片死平 */
+    radial-gradient(42% 38% at 18% 26%, rgba(120, 96, 72, 0.055), transparent 70%),
+    radial-gradient(38% 44% at 74% 62%, rgba(120, 96, 72, 0.05), transparent 72%),
+    radial-gradient(30% 30% at 44% 84%, rgba(255, 251, 244, 0.55), transparent 70%),
+    /* 橫向砌縫：暗線 ＋ 下方亮線＝厚度 */
+    repeating-linear-gradient(180deg,
+      var(--stage-seam) 0 1px,
+      var(--stage-mortar) 1px 3px,
+      transparent 3px 52px);
+}
+
+/* ---- 把高度還給牆 ----
+ * 彈幕之所以是彈幕，靠的是同時看得到很多句。可視帶只有兩條軌道時，
+ * 60 則散在 10 條軌道上，畫面上永遠只有一兩張——那不是彈幕，是空牆。
+ * 這裡把 hero 的每一段都壓薄，省下來的高度全部給舞台。
+ */
+body.shell-layout .site-mark {
+  padding-bottom: 0;
+  margin-bottom: 6px;
+}
+body.shell-layout .site-mark > .wall-scale {
+  font-size: clamp(1rem, 1.9vw, 1.22rem);
+  margin: 0 0 6px;
+}
+body.shell-layout .site-mark > .wall-scale strong { font-size: 1.55em; }
+.triage-item { padding-top: 7px; padding-bottom: 7px; }
+.triage-item .t-note { font-size: 0.76em; }
+.site-mark .alias-line { font-size: 0.78em; }
+.wall-toolbar { padding: 5px 0; }
+
+/* 舞台吃掉剩下的全部高度，並保證至少放得下四條軌道
+ * （軌道高 ≈ 卡片 98 ＋ 間距 6 ＋ 飄移 14 = 118px）。 */
+.wall-region .wall-stage { min-height: 472px; }
+
+/* ---- 膠帶再收斂一點：它是質感不是圖案 ---- */
+.msg-card::before {
+  top: -6px;
+  left: 22px;
+  width: 38px;
+  height: 12px;
+  background: linear-gradient(160deg, rgba(255, 249, 236, 0.78), rgba(247, 220, 174, 0.6));
+}
+
+/* ---- 密度修正：質感留下，高度還回來 ----
+ * 上一段把留言字級加到 1.08em、行高 1.66，卡片從 98px 變 140px，
+ * 軌道數直接被自己吃掉（實測可視帶 472px 只剩 2 軌）。
+ * ⛔ 材質、陰影、膠帶一個都不用退——它們不佔高度。佔高度的是字級與間距。
+ * 彈幕的份量來自「同時看得到很多句」，不是來自單句多大。
+ */
+.msg-card { padding: 9px 15px 8px; }
+.msg-body { font-size: 1em; line-height: 1.5; }
+.msg-card .msg-who { font-size: 0.76em; margin-top: 4px; }
+.msg-warmth { margin-top: 3px; font-size: 0.74em; line-height: 1.3; }
+.msg-reactions { margin-top: 5px; gap: 4px; }
+.msg-reaction { padding: 3px 9px; font-size: 0.75em; }
+/* 膠帶跟著卡片縮 */
+.msg-card::before { top: -5px; left: 18px; width: 32px; height: 10px; }
+
+/* ================================================================
+ * 新粗獷風（2026-08-31）
+ * Lee 指的參考站是 agent-skill.cc：粗黑邊框、硬邊實心投影（不模糊）、
+ * 大圓角、鮮明粉彩填色、粗體字。
+ *
+ * 上一輪我做的是相反的東西——髮絲邊框、柔和陰影、低彩度——「太樸素」
+ * 講的就是這件事。這一節把整站的形狀語彙換掉。
+ *
+ * ⛔ 不動的三件事：暖色身分（橘 #b45309 是國際防霸凌月識別色）、
+ *    左緣狀態豎線的語意（金＝還沒人回應／松青＝已有人回應）、
+ *    所有文字對比仍須過 WCAG AA（改完跑 a11y-probe）。
+ * ⛔ 硬邊投影不佔版面高度，邊框佔 4px——彈幕軌道高度只多 4px，
+ *    這是刻意的：質感不可以再吃掉密度（上一輪的教訓）。
+ * ================================================================ */
+
+:root {
+  /* 粗獷風的骨架色。暖黑，不是純黑——純黑放在暖奶油上會發青。 */
+  --edge:      #2e2419;
+  --edge-soft: rgba(46, 36, 25, 0.28);
+  /* 三張分流卡各自的填色。粉彩但夠飽，白底上仍是淺色，黑字對比 > 12:1 */
+  --fill-a: #ffd9a8;   /* 我被霸凌 */
+  --fill-b: #cfe4e8;   /* 我看見了 */
+  --fill-c: #e6dcf5;   /* 我想了解 */
+}
+
+/* ---- 共用：硬邊投影 ---- */
+.msg-card,
+.triage-item,
+.shell-nav-item,
+.shell-help,
+.msg-reaction,
+.wall-toolbar button,
+.shell-fs,
+.page-toc,
+.mine-empty,
+.composer-bar textarea,
+.composer-bar button {
+  border-radius: 11px;
+}
+
+/* ---- 留言卡＝貼紙 ---- */
+.msg-card {
+  border: 2px solid var(--edge);
+  border-left: 7px solid var(--rule-waiting);
+  border-radius: 12px;
+  background: var(--msg-paper);
+  background-image: none;
+  box-shadow: 4px 4px 0 var(--edge);
+}
+/* ⛔ 膠帶拿掉：硬邊投影已經是這一版的質感語彙，兩個一起用會變雜。 */
+.msg-card::before { display: none; }
+.msg-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 var(--edge);
+}
+.msg-body { font-weight: 500; }
+
+/* ---- 鼓勵鈕＝小貼紙 ---- */
+.msg-reaction {
+  border: 1.5px solid var(--edge);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--edge);
+}
+.msg-reaction:hover {
+  background: var(--warm-soft);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+/* ---- 分流三卡：各自填色、粗框、硬影 ---- */
+.triage-item {
+  border: 2px solid var(--edge);
+  border-left-width: 2px;
+  box-shadow: 4px 4px 0 var(--edge);
+  font-weight: 700;
+}
+.triage-item .t-label { letter-spacing: 0.02em; }
+.triage-victim    { background: var(--warm); }                 /* 白字 5.32:1 */
+.triage-bystander { background: var(--fill-b); }
+.triage-learn     { background: var(--fill-c); }
+.triage-bystander .t-label, .triage-learn .t-label { color: var(--edge); }
+.triage-bystander .t-note,  .triage-learn .t-note  { color: #4a3d2c; }
+.triage-bystander:hover { background: #bfd9de; }
+.triage-learn:hover     { background: #dbcef1; }
+.triage-item:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--edge); }
+
+/* ---- 工具列按鈕 ---- */
+.wall-toolbar button {
+  border: 2px solid var(--edge);
+  background: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.wall-toolbar button[aria-pressed="true"] {
+  background: var(--warm);
+  color: #fff;
+  border-color: var(--edge);
+}
+.wall-toolbar button:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--edge); }
+
+/* ---- 面板 ---- */
+.shell-panel { border-left: 2px solid var(--edge); }
+.shell-brand {
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  margin-inline: 0;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.shell-panel .shell-nav-item--action,
+.shell-nav-item[aria-current="page"] {
+  border: 2px solid var(--edge);
+  border-radius: 11px;
+  box-shadow: 3px 3px 0 var(--edge);
+  font-weight: 700;
+}
+.shell-nav-item[aria-current="page"] { background: var(--fill-a); }
+.shell-help {
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  box-shadow: 4px 4px 0 var(--edge);
+  font-weight: 700;
+}
+.shell-fs {
+  border: 1.5px solid var(--edge);
+  box-shadow: 2px 2px 0 var(--edge);
+  font-weight: 700;
+}
+
+/* ---- 分頁：目錄與空狀態也吃同一套形狀 ---- */
+.page-toc {
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: var(--card);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+.page-toc ol { border-top: 0; }
+.page-toc li:last-child { border-bottom: 0; }
+.mine-empty {
+  border: 2px dashed var(--edge);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--edge-soft);
+}
+.mine-empty-btn,
+.composer-bar button[type="submit"] {
+  border: 2px solid var(--edge);
+  border-radius: 11px;
+  box-shadow: 3px 3px 0 var(--edge);
+  font-weight: 700;
+}
+.composer-bar textarea { border: 2px solid var(--edge); }
+
+/* ---- 標題更有份量 ---- */
+.page-body h1, .site-mark h1 { font-weight: 800; letter-spacing: -0.01em; }
+.page-body h2 { font-weight: 800; }
+.page-toc-h, .shell-tools-h { font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .msg-card:hover, .triage-item:hover, .msg-reaction:hover,
+  .wall-toolbar button:hover { transform: none; }
+}
