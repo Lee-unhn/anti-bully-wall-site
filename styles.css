@@ -2775,3 +2775,23 @@ body.admin {
   /* 通知也要墊高，否則會被輸入列與 tab bar 蓋掉 */
   .warmth-toasts { bottom: calc(64px + 68px + 76px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* 後台的內容編輯區塊 */
+.admin-block {
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-1);
+  margin: 0 0 var(--sp-3);
+  background: var(--card);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.admin-block legend { font-weight: 700; padding: 0 8px; font-size: var(--fs-4); }
+.admin-block label { display: block; font-size: var(--fs-5); font-weight: 700; margin-bottom: 3px; }
+.admin-block input, .admin-block textarea {
+  width: 100%; max-width: 60ch; padding: 7px 10px; font: inherit; font-size: var(--fs-4);
+  border: 2px solid var(--edge); border-radius: 9px; background: #fff; color: var(--ink);
+}
+.admin-block-type {
+  margin: var(--sp-3) 0 4px; font-size: var(--fs-5); font-weight: 700;
+  color: var(--ink-soft); letter-spacing: 0.06em;
+}

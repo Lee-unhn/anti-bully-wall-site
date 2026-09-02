@@ -9,7 +9,7 @@
      GitHub Pages 完全不讀它（實測線上 404），CSP 因此不會生效。
      meta 版換到任何靜態主機都有效，兩者並存不衝突。 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https://xppcelhclohxdkzwijbm.supabase.co; font-src 'self'; base-uri 'self'; form-action 'self'">
-<link rel="stylesheet" href="styles.css?v=9450dbf8">
+<link rel="stylesheet" href="styles.css?v=dcc0fc10">
 </head>
 <body class="admin">
 
@@ -84,6 +84,34 @@
     <p class="notice" data-admin="rx-note" hidden></p>
   </section>
 
+  <section class="kw-section" aria-labelledby="cs-h">
+    <h2 id="cs-h">霸凌是什麼樣子</h2>
+    <!-- ⛔ 只改字。錨點 id、區塊型別、插圖都不可從這裡改：
+         id 是目錄與外部連結指向的位置；型別決定版面，而版面裡藏著可及性
+         與對比的裁定；插圖是可執行的標記，不是文案。 -->
+    <p class="admin-note">只改文字。粗體寫成 <code>**這樣**</code>。不吃 HTML——
+      後台改的內容會送到每個訪客的瀏覽器，吃 HTML 等於開一條 XSS 路徑。</p>
+    <form data-admin="cases-form">
+      <div data-admin="cases-fields"></div>
+      <p><button type="submit">儲存案例頁</button></p>
+    </form>
+    <p class="notice" data-admin="cases-note" hidden></p>
+  </section>
+
+  <section class="kw-section" aria-labelledby="lw-h">
+    <h2 id="lw-h">你該知道的三件事</h2>
+    <!-- ⛔ 這一頁的內容是法規。引用條文原文不涉著作權，但把條文解釋、
+         涵攝到具體情境是法律判斷，需要律師檢視（law.signedOff 仍為 false）。
+         改這裡之前先確認你在改的是「原文與程序事實」還是「解釋」。 -->
+    <p class="admin-note">⚠️ 這一頁引用法規原文。改「原文與期限」要對照全國法規資料庫；
+      加入「這條套用到你的狀況會怎樣」這類解釋，屬於法律判斷，須先經律師檢視。</p>
+    <form data-admin="law-form">
+      <div data-admin="law-fields"></div>
+      <p><button type="submit">儲存法規頁</button></p>
+    </form>
+    <p class="notice" data-admin="law-note" hidden></p>
+  </section>
+
   <section class="kw-section" aria-labelledby="k-h">
     <h2 id="k-h">姓名遮蔽清單</h2>
     <p class="admin-note" data-admin="kw-summary">—</p>
@@ -98,16 +126,18 @@
   </section>
 </main>
 
-<script src="js/config.js?v=9450dbf8"></script>
-<script src="content.js?v=9450dbf8"></script>
-<script src="js/prefs.js?v=9450dbf8"></script>
-<script src="js/schema.js?v=9450dbf8"></script>
-<script src="js/keywords.js?v=9450dbf8"></script>
-<script src="js/data-provider.js?v=9450dbf8"></script>
-<script src="js/supabase-provider.js?v=9450dbf8"></script>
-<script src="js/content-merge.js?v=9450dbf8"></script>
-<script src="js/guard.js?v=9450dbf8"></script>
-<script src="js/triage.js?v=9450dbf8"></script>
-<script src="js/admin.js?v=9450dbf8"></script>
+<script src="js/config.js?v=dcc0fc10"></script>
+<script src="content.js?v=dcc0fc10"></script>
+<script src="js/prefs.js?v=dcc0fc10"></script>
+<script src="js/schema.js?v=dcc0fc10"></script>
+<script src="js/keywords.js?v=dcc0fc10"></script>
+<script src="js/data-provider.js?v=dcc0fc10"></script>
+<script src="js/supabase-provider.js?v=dcc0fc10"></script>
+<script src="js/content-merge.js?v=dcc0fc10"></script>
+<script src="js/pages.js?v=dcc0fc10"></script>
+<script src="js/guard.js?v=dcc0fc10"></script>
+<script src="js/triage.js?v=dcc0fc10"></script>
+<script src="js/admin-content.js?v=dcc0fc10"></script>
+<script src="js/admin.js?v=dcc0fc10"></script>
 </body>
 </html>

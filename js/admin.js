@@ -315,6 +315,7 @@
       .then(render)
       .then(renderKeywords)
       .then(renderReactions)
+      .then(function () { return ABW.adminContent ? ABW.adminContent.boot() : null; })
       .catch(function (err) {
         console.error('[ABW] 後台啟動失敗', err);
         throw err;

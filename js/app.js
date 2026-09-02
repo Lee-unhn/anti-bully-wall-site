@@ -146,6 +146,9 @@
 
   function bootRender() {
     renderStaticCopy();
+    /* 兩個分頁的內容由資料驅動（2026-09-02）。這兩支自己會判斷掛載點在不在，
+     * 所以每一頁都呼叫是安全的。 */
+    if (ABW.pages) { ABW.pages.renderCases(); ABW.pages.renderLaw(); }
     renderTriage();
     renderReactionLegend();
     renderLawCards();
